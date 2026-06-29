@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дашборд Аліни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mist:#ECEFEA;--mist2:#E3E7E0;--spruce:#1F3A34;--spruce2:#2E6E5A;--slate:#3E6B7A;
+  --amber:#E2972F;--rose:#C97B84;--ink:#1C2622;--muted:#6B756F;--line:#D4DAD2;--card:#FBFCFA;
+  --shadow:0 1px 2px rgba(31,58,52,.06),0 8px 24px rgba(31,58,52,.07);--r:14px;
+  --c-vag:#C97B84;--c-spektr:#E0913A;--c-health:#3E6B7A;--c-move:#2E6E5A;
+  --c-read:#6E6A8A;--c-work:#4A4A4A;--c-fund:#1F3A34;--c-admin:#707A72;
+  --ok:#2E6E5A;--over:#3E6B7A;--under:#C9722B;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--mist);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4,.disp{font-family:'Oswald','Inter',sans-serif;letter-spacing:.01em}
+button{font-family:inherit}::selection{background:var(--amber);color:#fff}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 96px}
+header.top{position:sticky;top:0;z-index:40;color:#fff;margin:0 -16px;padding:14px 16px 12px;background:linear-gradient(160deg,#24433c,#1F3A34 60%,#1a322c)}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{margin:0;font-size:24px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.brand .sub{color:#bcd2c8;font-size:12.5px;font-weight:500}
+.dawn{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.dawn .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 12px;min-width:118px;flex:1 1 118px}
+.dawn .pill .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#a9c6bb}
+.dawn .pill .val{font-family:'Oswald';font-size:21px;font-weight:600;line-height:1.1;margin-top:2px}
+.dawn .pill .val small{font-size:12px;font-weight:400;color:#cfe0d8}
+.dawn .pill.rose{background:rgba(201,123,132,.22);border-color:rgba(201,123,132,.4)}
+nav.tabs{position:sticky;top:0;z-index:35;background:var(--mist);display:flex;gap:4px;overflow-x:auto;padding:10px 0 8px;margin:0 -4px;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s}
+.tab:hover{color:var(--ink);border-color:#c2cabf}
+.tab[aria-selected="true"]{background:var(--spruce);color:#fff;border-color:var(--spruce)}
+.tab:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.view{display:none;animation:fade .25s ease}.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:980px){.tcols{grid-template-columns:1fr!important}}
+@media(max-width:880px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.g2,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 10px;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+.rowflex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{background:var(--spruce);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px;cursor:pointer}
+.btn:hover{background:#16302a}.btn.amber{background:var(--amber)}.btn.amber:hover{background:#cf8523}
+.btn.ghost{background:transparent;color:var(--spruce);border:1px solid var(--line)}.btn.ghost:hover{background:var(--mist)}
+.btn.sm{padding:7px 11px;font-size:13px}.btn.danger{color:var(--rose);border-color:#e6c2c6}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+.fld{border:1px solid var(--line);border-radius:9px;padding:9px;font-size:14px;background:#fff;width:100%}
+.fld:focus{outline:2px solid var(--amber);border-color:var(--amber)}
+.chip{display:inline-block;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:999px;color:#fff}
+.note-soft{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px}
+.foot{margin-top:34px;text-align:center;font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 13px;border-radius:999px;font-weight:600;font-size:12.5px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--spruce);color:#fff}
+
+/* timeline (Google-Calendar style) */
+.allday{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.adchip{font-size:11.5px;font-weight:600;background:#fff;border:1px solid var(--line);border-left-width:3px;border-radius:7px;padding:3px 8px;color:var(--ink)}
+.adchip.done{opacity:.5;text-decoration:line-through}
+.tgrid{position:relative;margin-top:4px}
+.tgrid .hr{position:relative;height:46px;border-top:1px solid var(--line)}
+.tgrid .hr:last-child{border-bottom:1px solid var(--line)}
+.tgrid .hr>span{position:absolute;top:-8px;left:0;font-family:'Oswald';font-size:11px;color:var(--muted);background:var(--card);padding-right:6px}
+.tblocks{position:absolute;top:0;left:48px;right:4px;bottom:0}
+.tblock{position:absolute;left:0;right:0;background:#fff;border:1px solid var(--line);border-left:4px solid var(--bc);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(31,58,52,.08);cursor:grab;touch-action:none}
+.tblock.task{background:#fbfdfb}
+.tblock.event{background:#fffdf7}
+.tblock.done{opacity:.55}
+.tblock.dragging{cursor:grabbing;z-index:20;box-shadow:0 8px 20px rgba(31,58,52,.18)}
+.tb-in{display:flex;gap:6px;align-items:flex-start;padding:4px 6px;height:100%}
+.tb-chk{flex:0 0 18px;width:18px;height:18px;border:2px solid var(--line);border-radius:5px;background:#fff;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.tblock.done .tb-chk{background:var(--spruce2);border-color:var(--spruce2)}
+.tb-txt{flex:1;min-width:0;font-size:12px;line-height:1.25;overflow:hidden}
+.tb-txt b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-time{font-family:'Oswald';font-size:10.5px;color:var(--muted)}
+.tb-note{display:block;font-size:10.5px;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-ctl{display:flex;gap:1px;flex:0 0 auto}
+.tb-ctl button{border:0;background:transparent;color:#aab2ac;font-size:12px;cursor:pointer;padding:1px 2px;border-radius:5px}
+.tb-ctl button:hover{color:var(--spruce);background:var(--mist)}
+.tb-resize{position:absolute;left:0;right:0;bottom:0;height:8px;cursor:ns-resize}
+.nowline{position:absolute;left:0;right:0;height:2px;background:#d6453b;z-index:15}
+.nowline::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#d6453b}
+
+/* today list/cat */
+.cl{list-style:none;margin:0;padding:0}
+.cl li{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.cl li:last-child{border-bottom:0}
+.cl .box{width:21px;height:21px;border:2px solid var(--line);border-radius:6px;flex:0 0 21px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer;transition:.15s}
+.cl li.done .box{background:var(--spruce2);border-color:var(--spruce2)}
+.cl li.done .txt{text-decoration:line-through;color:var(--muted)}
+.cl .pcdot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+.cl .etime{font-family:'Oswald';font-weight:600;font-size:12px;color:var(--spruce);flex:0 0 84px}
+.cl .etime.none{color:#bcc4be}
+.cl .txt{flex:1;font-size:14px}.cl .meta{font-size:11.5px;color:var(--muted)}
+.cl .tnote{display:block;font-size:11.5px;color:var(--slate)}
+.cl .ctrl{display:flex;gap:2px;flex:0 0 auto}
+.cl .ctrl button{border:0;background:transparent;color:#b3bbb5;cursor:pointer;font-size:14px;padding:2px 3px;border-radius:6px}
+.cl .ctrl button:hover{color:var(--spruce);background:var(--mist)}
+.cl .ctrl .x:hover{color:var(--rose)}
+.timehdr{font-family:'Oswald';font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 2px}
+
+/* weekly progress */
+.wk-prio{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.wk-prio:last-child{border-bottom:0}
+.wk-prio .nm{flex:0 0 130px;font-size:13px;font-weight:600}
+@media(max-width:560px){.wk-prio .nm{flex:0 0 96px;font-size:12px}}
+.wk-prio .bar{flex:1;height:9px;border-radius:999px;background:var(--mist2);overflow:hidden;position:relative}
+.wk-prio .bar>span{display:block;height:100%;border-radius:999px}
+.wk-prio .bar>.pace{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.35}
+.wk-prio .stat{flex:0 0 92px;text-align:right;font-family:'Oswald';font-size:13px}
+.tag-ok{color:var(--ok)}.tag-over{color:var(--over)}.tag-under{color:var(--under)}
+
+/* task manager */
+.tm-row{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px}
+.tm-row .ttl{flex:1;font-size:14px;font-weight:600}
+.tm-row .tm-time{font-family:'Oswald';font-size:12.5px;color:var(--slate);white-space:nowrap}
+.tm-row .tg{font-family:'Oswald';font-size:13px;color:var(--muted);white-space:nowrap}
+.tm-row button{border:0;background:transparent;cursor:pointer;font-size:15px;color:#b3bbb5;padding:2px 4px;border-radius:6px}
+.tm-row button:hover{color:var(--spruce);background:var(--mist)}.tm-row .x:hover{color:var(--rose)}
+.addgrid{display:grid;grid-template-columns:1fr 96px 96px 150px 80px auto;gap:8px;align-items:end}
+@media(max-width:760px){.addgrid{grid-template-columns:1fr 1fr}}
+.addgrid label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;display:block;margin-bottom:3px}
+
+/* calendar */
+.cal-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.nav-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:18px;color:var(--spruce)}
+.nav-btn:hover{background:var(--mist)}
+.cal-title{font-family:'Oswald';font-weight:600;font-size:20px;text-transform:capitalize;min-width:140px}
+.today-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer;color:var(--spruce)}
+.upnext{margin-bottom:14px}
+.up-row{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+.up-row:last-child{border-bottom:0}
+.up-row .ud{font-family:'Oswald';font-weight:600;font-size:14px;flex:0 0 90px;color:var(--spruce)}
+.up-row .ut{flex:1;font-size:13.5px}.up-row .star{color:var(--amber)}
+.up-empty{font-size:13px;color:var(--muted);padding:6px 0}
+
+/* week time grid */
+.wkgrid-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.wkhead{display:grid;grid-template-columns:48px repeat(7,minmax(96px,1fr));position:sticky;top:0;background:var(--card);z-index:6;border-bottom:1px solid var(--line)}
+.wkhead .gut{}
+.wkhead .wh{padding:8px 6px;text-align:center;cursor:pointer;border-left:1px solid var(--line)}
+.wkhead .wh.today{background:rgba(226,151,47,.12)}
+.wkhead .wh .dw{font-size:10.5px;text-transform:uppercase;color:var(--muted)}
+.wkhead .wh .dn{font-family:'Oswald';font-weight:600;font-size:17px}
+.wkad{display:grid;grid-template-columns:48px repeat(7,minmax(96px,1fr));border-bottom:1px solid var(--line)}
+.wkad .gut{font-size:9px;color:var(--muted);padding:3px}
+.wkad .adcell{border-left:1px solid var(--line);padding:3px;min-height:22px;display:flex;flex-direction:column;gap:2px}
+.wkad .adcell .adchip{font-size:10px;padding:2px 5px}
+.wkbody{display:grid;grid-template-columns:48px repeat(7,minmax(96px,1fr));position:relative}
+.wkbody .gutcol{position:relative}
+.wkbody .gutcol .gh{height:42px;border-top:1px solid var(--line);position:relative}
+.wkbody .gutcol .gh span{position:absolute;top:-7px;right:5px;font-family:'Oswald';font-size:10px;color:var(--muted)}
+.wkcol{position:relative;border-left:1px solid var(--line);cursor:pointer}
+.wkcol .gh{height:42px;border-top:1px solid var(--line)}
+.wkcol.today{background:rgba(226,151,47,.05)}
+.wblk{position:absolute;left:2px;right:2px;border-radius:6px;background:#fff;border-left:3px solid var(--bc);font-size:10px;padding:2px 4px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.wblk b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wblk.task{background:#fbfdfb;opacity:.92}.wblk.event{background:#fffdf7}
+
+/* month / year */
+.month{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.month .dow{font-size:11px;text-transform:uppercase;color:var(--muted);text-align:center;font-weight:600;padding:4px 0}
+.mday{background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:78px;padding:6px;cursor:pointer;transition:.12s;position:relative}
+.mday:hover{border-color:var(--spruce2)}.mday.out{opacity:.4}
+.mday.today{border-color:var(--amber);box-shadow:0 0 0 2px rgba(226,151,47,.25)}
+.mday .n{font-family:'Oswald';font-weight:600;font-size:15px}
+.mday .mini{font-size:9.5px;line-height:1.3;margin-top:2px;overflow:hidden;max-height:46px}
+.mday .mini .mi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mday .star{position:absolute;top:5px;right:6px;color:var(--amber);font-size:11px}
+@media(max-width:560px){.mday{min-height:56px}.mday .n{font-size:13px}.mday .mini{display:none}}
+.year{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:760px){.year{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.year{grid-template-columns:1fr}}
+.ymonth{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;transition:.15s}
+.ymonth:hover{border-color:var(--spruce2);transform:translateY(-2px)}
+.ymonth h4{margin:0 0 6px;font-family:'Oswald';text-transform:capitalize;font-size:15px}
+.ygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.ygrid span{font-size:10px;text-align:center;padding:2px 0;border-radius:4px;color:var(--muted)}
+.ygrid span.has{background:var(--spruce);color:#fff;font-weight:600}
+.ygrid span.tdy{background:var(--amber);color:#fff;font-weight:700}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(28,38,34,.45);z-index:60;display:none}.scrim.on{display:block}
+.drawer{position:fixed;z-index:61;background:var(--mist);right:0;top:0;bottom:0;width:min(440px,94vw);transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.18)}
+.drawer.on{transform:none}
+.drawer .dhd{padding:18px 18px 12px;background:var(--spruce);color:#fff;position:relative}
+.drawer .dhd .dt{font-family:'Oswald';font-size:22px;font-weight:600;text-transform:capitalize}
+.drawer .dhd .ds{font-size:12.5px;color:#bcd2c8}
+.drawer .dbody{padding:16px 18px;overflow:auto;flex:1}
+.drawer .close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:0;color:#fff;width:34px;height:34px;border-radius:9px;font-size:18px;cursor:pointer}
+.ev-row{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px}
+.ev-row .et{font-family:'Oswald';font-weight:600;color:var(--spruce);font-size:13px;flex:0 0 56px}
+.ev-row .ex{flex:1;font-size:13.5px}.ev-row .erm{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
+.ev-row.plan{opacity:.85}.ev-row.plan .et{color:var(--slate)}
+.ev-row.aff{background:#f3f6f4}
+.dform label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;display:block;margin:10px 0 3px}
+.dform input,.dform select,.dform textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;font-size:14px;background:#fff}
+.dform .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dform textarea{min-height:60px;resize:vertical}
+.star-toggle{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;cursor:pointer}
+.copybox{width:100%;min-height:160px;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;background:#fff}
+
+/* kitchen */
+.twoplate{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+@media(max-width:560px){.twoplate{grid-template-columns:1fr}}
+.plate{border-radius:12px;padding:14px;border:1px solid var(--line)}
+.plate.him{background:#f3f6f4}.plate.her{background:#fbf2f3;border-color:#eccfd2}
+.plate h4{margin:0 0 8px;font-size:15px;text-transform:uppercase}.plate ul{margin:0;padding-left:18px;font-size:13px}.plate ul li{margin:3px 0}
+.filterbar{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.fb{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.fb[aria-pressed="true"]{background:var(--spruce);color:#fff;border-color:var(--spruce)}
+.recipe{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.recipe .rh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;cursor:pointer}
+.recipe .rname{font-family:'Oswald';font-weight:600;font-size:16px}
+.recipe .rtag{font-size:11px;text-transform:uppercase;color:#fff;padding:3px 8px;border-radius:999px;background:var(--slate);white-space:nowrap}
+.recipe .rdetail{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.recipe.open .rdetail{display:block}.recipe .prod{font-size:13px;margin:0 0 10px}.recipe .prod b{font-family:'Oswald'}
+.recipe ol{margin:8px 0 0;padding-left:20px;font-size:13.5px}.recipe ol li{margin:4px 0}
+.recipe .note{font-size:12.5px;color:var(--muted);margin-top:10px;background:var(--mist);padding:8px 10px;border-radius:8px}
+.shop{columns:2;column-gap:18px}@media(max-width:560px){.shop{columns:1}}
+.shop .scat{break-inside:avoid;margin-bottom:14px}
+.shop .scat h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;color:var(--slate)}
+.shop label{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:4px 0;cursor:pointer}
+.shop input{width:17px;height:17px;accent-color:var(--spruce2)}
+.shop label.done span{text-decoration:line-through;color:var(--muted)}
+.shop .cdel{margin-left:auto;border:0;background:transparent;color:#ccc;cursor:pointer}.shop .cdel:hover{color:var(--rose)}
+
+/* weekend */
+.roulette{background:linear-gradient(135deg,#24433c,#2E6E5A);color:#fff;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
+.roulette .rlabel{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#bcd2c8}
+.roulette .rpick{font-family:'Oswald';font-size:22px;font-weight:600;margin:6px 0 4px;min-height:30px}
+.roulette .rwhy{font-size:12.5px;color:#d3e2da}
+.roulette button{margin-top:12px;background:var(--amber);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px}
+.idea{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.idea .ih{font-family:'Oswald';font-weight:600;font-size:15px;margin-bottom:6px}.idea ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}.idea ul li{margin:3px 0}
+.idea .badge{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--spruce2);background:#e4efe9;border-radius:999px;padding:2px 8px;margin-top:8px}
+
+/* books */
+.book{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+.book .brow{display:flex;gap:12px;align-items:flex-start}
+.book .bmain{flex:1;cursor:pointer}
+.book .bt{font-weight:700;font-size:14.5px}.book .bt .caret{color:#bcc4be;font-size:11px;margin-left:5px}
+.book .ba{font-size:12.5px;color:var(--muted)}
+.book .bwhy{font-size:12.5px;color:var(--slate);margin-top:3px}
+.book .bcat{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;color:#fff;background:var(--read);border-radius:999px;padding:2px 7px;margin-top:6px}
+.book .bctl{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.book .st{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;background:#fff}
+.book .st.plan{color:var(--muted)}.book .st.now{background:var(--amber);color:#fff;border-color:var(--amber)}.book .st.done{background:var(--spruce2);color:#fff;border-color:var(--spruce2)}
+.book .fmt{font-size:11px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:3px 9px;cursor:pointer;background:#fff;color:var(--slate)}
+.book .bx{border:0;background:transparent;color:#ccc;cursor:pointer;font-size:14px}.book .bx:hover{color:var(--rose)}
+.book .bdetail{display:none;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}
+.book.open .bdetail{display:block}
+.book .bdesc{font-size:13px;margin:0 0 8px}.book .blink{font-size:12.5px;color:var(--slate);text-decoration:none;font-weight:600}
+.book .bnlabel{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin:8px 0 4px}
+.book .bnotes{width:100%;min-height:60px;border:1px solid var(--line);border-radius:9px;padding:8px;font-size:13px;background:#fff;resize:vertical}
+
+/* affairs */
+.aff{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.aff .ahd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.aff h3{margin:0 0 4px;font-size:16px;text-transform:uppercase;letter-spacing:.03em}
+.aff .asub{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.aff .secdel{border:0;background:transparent;color:#ccc;cursor:pointer;font-size:15px}.aff .secdel:hover{color:var(--rose)}
+.aff .arow{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.aff .arow:last-of-type{border-bottom:0}
+.aff .abox{width:20px;height:20px;border:2px solid var(--line);border-radius:6px;flex:0 0 20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;cursor:pointer}
+.aff .arow.done .abox{background:var(--spruce2);border-color:var(--spruce2)}
+.aff .arow.done .at{text-decoration:line-through;color:var(--muted)}
+.aff .at{flex:1;font-size:14px}
+.aff .adate{border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12px;background:#fff;color:var(--slate);width:140px}
+.aff .ax{border:0;background:transparent;color:#ccc;cursor:pointer;font-size:15px}.aff .ax:hover{color:var(--rose)}
+.aff .addmini{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.aff .addmini input[type=text]{flex:1;min-width:140px}
+.newcl{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.newcl input{flex:1;min-width:180px}
+/* header redesign */
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.todaycard{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 16px;text-align:right;min-width:172px}
+.todaycard .tcl{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:#a9c6bb}
+.todaycard .tcd{font-family:'Oswald';font-weight:600;font-size:15px;color:#fff;margin-top:1px}
+.todaycard .tcb{font-family:'Oswald';font-weight:700;font-size:30px;color:#fff;line-height:1}
+@media(max-width:560px){.todaycard{flex:1;text-align:left}}
+
+/* today day navigation */
+.daynav{display:flex;align-items:center;gap:6px}
+.daynav .nb{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px;color:var(--spruce);line-height:1}
+.daynav .nb:hover{background:var(--mist)}
+.daynav .tdc{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-weight:600;font-size:12px;cursor:pointer;color:var(--spruce)}
+.daynav.future #checkTitle,.daynav.past #checkTitle{color:var(--slate)}
+.dayflag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:999px;margin-left:8px}
+.dayflag.today{background:#e4efe9;color:var(--spruce2)}
+.dayflag.other{background:rgba(226,151,47,.16);color:var(--under)}
+
+/* add-to-day form */
+.dayadd{display:grid;grid-template-columns:1fr 88px 88px 1fr auto;gap:8px;align-items:end;margin-top:10px}
+@media(max-width:760px){.dayadd{grid-template-columns:1fr 1fr}}
+.dayadd label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;display:block;margin-bottom:3px}
+.tplrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.tplrow select{flex:1;min-width:160px}
+
+/* conflicts */
+.warnbadge{position:absolute;top:2px;right:3px;font-size:11px;z-index:5;filter:drop-shadow(0 0 1px #fff)}
+.tblock.conflict{border-color:var(--amber);box-shadow:0 0 0 1.5px rgba(226,151,47,.55)}
+.wblk.conflict{outline:1.5px solid var(--amber)}
+.conflict-note{display:flex;align-items:center;gap:7px;background:#fdf3e3;border:1px solid #f0d9ad;border-radius:10px;padding:8px 11px;font-size:12.5px;color:#8a5a14;margin:0 0 10px}
+
+/* affairs times + drag */
+.aff .atime{display:flex;gap:4px;align-items:center}
+.aff .atime input{border:1px solid var(--line);border-radius:8px;padding:4px 5px;font-size:11.5px;background:#fff;color:var(--slate);width:64px}
+.aff .amove{display:flex;flex-direction:column;gap:0}
+.aff .amove button{border:0;background:transparent;color:#b3bbb5;cursor:pointer;font-size:12px;line-height:1;padding:1px 3px}
+.aff .amove button:hover{color:var(--spruce)}
+.aff .arow.grab{cursor:grab;touch-action:none}
+.aff .arow.dragging{opacity:.6;background:var(--mist)}
+.aff .ahandle{cursor:grab;color:#c2cabf;font-size:14px;flex:0 0 auto;touch-action:none}
+.aff .ahandle:hover{color:var(--slate)}
+@media(max-width:560px){.aff .arow{flex-wrap:wrap}.aff .atime input{width:58px}}
+
+/* calendar affair checkbox */
+.ev-row .achk{flex:0 0 20px;width:20px;height:20px;border:2px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;cursor:pointer;background:#fff}
+.ev-row.aff.done .achk{background:var(--spruce2);border-color:var(--spruce2)}
+.ev-row.aff.done .ex{text-decoration:line-through;color:var(--muted)}
+.ev-row.plan .ex{cursor:pointer}
+.ev-row.plan .ex:hover{color:var(--spruce)}
+
+/* tab editor */
+.tab.tabedit{border-style:dashed;color:var(--slate)}
+.tabedit-row{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:8px}
+.tabedit-row input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px}
+.tabedit-row button{border:1px solid var(--line);background:#fff;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;color:var(--spruce)}
+.tabedit-row button:hover{background:var(--mist)}
+
+/* per-category quick add */
+.catadd{display:grid;grid-template-columns:1fr 92px 92px 70px auto;gap:6px;align-items:center;margin:6px 0 4px;padding:8px;border:1px dashed var(--line);border-radius:10px;background:#fbfdfb}
+.catadd .fld{padding:7px}
+@media(max-width:680px){.catadd{grid-template-columns:1fr 1fr}}
+
+/* activity */
+.actcat{margin-bottom:8px}
+.actcat .acthd{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:600;font-size:16px;margin:14px 0 8px}
+.actcat .actnote{font-size:12.5px;color:var(--muted);margin:-4px 0 10px}
+.actitem{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+.actitem .ai-main{flex:1;min-width:0}
+.actitem .ai-t{font-weight:600;font-size:14px}
+.actitem .ai-d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.actitem .ai-add{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:8px;width:34px;height:34px;font-size:18px;color:var(--spruce2);cursor:pointer}
+.actitem .ai-add:hover{background:var(--mist)}
+.acttray{margin-bottom:14px;border:1px dashed var(--spruce2)}
+.acttray.empty{display:none}
+.acttray h3{margin:0 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.03em}
+.acttray .trchip{display:inline-flex;align-items:center;gap:6px;background:#eef4f0;border:1px solid #cfe0d8;border-radius:999px;padding:5px 10px;margin:0 6px 6px 0;font-size:12.5px}
+.acttray .trchip button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
+.acttray .trbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.acttray .trbar input[type=time]{border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px;background:#fff}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="brandrow">
+      <div class="brand"><h1>Ясно</h1><span class="sub">персональний дашборд</span></div>
+      <div class="todaycard" id="todayCard"></div>
+    </div>
+    <div class="dawn" id="dawn"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab" role="tab" data-v="today" aria-selected="true">Сьогодні</button>
+    <button class="tab" role="tab" data-v="prio">Пріоритети</button>
+    <button class="tab" role="tab" data-v="cal">Календар</button>
+    <button class="tab" role="tab" data-v="kitchen">Кухня</button>
+    <button class="tab" role="tab" data-v="books">Книги</button>
+    <button class="tab" role="tab" data-v="weekend">Вихідні</button>
+    <button class="tab" role="tab" data-v="affairs">Справи · документи</button>
+  </nav>
+
+  <main>
+    <!-- TODAY -->
+    <section class="view on" id="v-today">
+      <div class="grid tcols" style="grid-template-columns:1.4fr 1fr">
+        <div class="card">
+          <div class="rowflex" style="justify-content:space-between;margin-bottom:10px">
+            <div class="daynav" id="dayNav">
+              <button class="nb" id="dayPrev" aria-label="Попередній день">‹</button>
+              <button class="nb" id="dayNext" aria-label="Наступний день">›</button>
+              <button class="tdc" id="dayToday">Сьогодні</button>
+              <h3 id="checkTitle" style="margin:0 0 0 6px"></h3>
+            </div>
+            <div class="seg" id="todayMode">
+              <button data-m="grid" aria-pressed="true">Стрічка</button>
+              <button data-m="list" aria-pressed="false">Список</button>
+              <button data-m="cat" aria-pressed="false">Категорії</button>
+            </div>
+          </div>
+          <div id="dayConflict"></div>
+          <div id="todayList"></div>
+          <p class="note-soft">Гортай дні стрілками ‹ ›, щоб планувати наперед. Правки тут стосуються лише обраного дня — вкладку «Пріоритети» не чіпають. Стрічка: тягни блок, щоб пересунути; нижній край — тривалість. ✎ — змінити, ✕ — прибрати з дня.</p>
+          <div style="border-top:1px dashed var(--line);margin-top:12px;padding-top:12px">
+            <div class="rowflex" style="justify-content:space-between"><strong style="font-size:13px">Додати задачу на цей день</strong></div>
+            <div class="dayadd">
+              <div><label>Що зробити</label><input class="fld" id="daTitle" placeholder="напр. УЗД, дзвінок мамі"></div>
+              <div><label>Від</label><input class="fld" id="daStart" type="time"></div>
+              <div><label>До</label><input class="fld" id="daEnd" type="time"></div>
+              <div><label>Пріоритет</label><select class="fld" id="daPrio"></select></div>
+              <div><button class="btn" id="daAdd">Додати</button></div>
+            </div>
+            <div class="tplrow" id="daTplWrap">
+              <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">або з шаблону:</label>
+              <select class="fld" id="daTpl"></select>
+              <button class="btn ghost sm" id="daTplAdd">+ У план дня</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px"><h3>Прогрес · цей тиждень</h3><div id="wkProgress"></div>
+            <p class="note-soft">Темна риска — темп «вчасно».</p></div>
+          <div class="card"><h3>Підсумок тижня</h3><div id="wkSummary"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRIORITIES -->
+    <section class="view" id="v-prio">
+      <p class="eyebrow">Твій стек і його тижневі цілі</p>
+      <div class="grid g4" id="prioCards"></div>
+      <p class="eyebrow">Завдання — додати, змінити, видалити</p>
+      <div class="card">
+        <div class="addgrid">
+          <div><label>Що робити</label><input class="fld" id="ntTitle" placeholder="напр. Плавання на річці"></div>
+          <div><label>Від</label><input class="fld" id="ntStart" type="time"></div>
+          <div><label>До</label><input class="fld" id="ntEnd" type="time"></div>
+          <div><label>Пріоритет</label><select class="fld" id="ntPrio"></select></div>
+          <div><label>Разів/тиж</label><input class="fld" id="ntTarget" type="number" min="1" max="14" value="3"></div>
+          <div><button class="btn" id="ntAdd">Додати</button></div>
+        </div>
+      </div>
+      <div id="taskList" style="margin-top:14px"></div>
+      <p class="note-soft">✎ — повне редагування (назва, час від–до, пріоритет, разів/тиждень, нотатки). ↑↓ — порядок.</p>
+    </section>
+
+    <!-- CALENDAR -->
+    <section class="view" id="v-cal">
+      <div class="card upnext"><h3>Найближчі важливі дати</h3><div id="upnext"></div></div>
+      <div class="cal-bar">
+        <div class="seg" role="group" aria-label="Режим">
+          <button data-mode="day" aria-pressed="false">День</button>
+          <button data-mode="week" aria-pressed="true">Тиждень</button>
+          <button data-mode="month" aria-pressed="false">Місяць</button>
+          <button data-mode="year" aria-pressed="false">Рік</button>
+        </div>
+        <button class="nav-btn" id="calPrev" aria-label="Назад">‹</button>
+        <span class="cal-title" id="calTitle"></span>
+        <button class="nav-btn" id="calNext" aria-label="Вперед">›</button>
+        <button class="today-btn" id="calToday">Сьогодні</button>
+      </div>
+      <div id="calBody"></div>
+      <p class="note-soft">Тиждень і день — погодинна сітка: видно і план дня, і важливі події, і дедлайни зі «Справ». Клікни день — повний план і додавання події.</p>
+    </section>
+
+    <!-- KITCHEN -->
+    <section class="view" id="v-kitchen">
+      <div class="card" style="margin-bottom:16px">
+        <h3>Одна каструля — дві тарілки</h3>
+        <p style="font-size:13.5px;color:var(--muted);margin:0 0 6px">Готуєш раз. Розкладаєш по-різному: йому — скинути, тобі — живити вагітність.</p>
+        <div class="twoplate">
+          <div class="plate him"><h4>Тарілка Спектра</h4><ul><li>½ овочі</li><li>¼ білок (щедро)</li><li>¼ крупа/картопля (мало)</li><li>хліб мінімум, без солодкого</li><li>увечері — легше</li></ul></div>
+          <div class="plate her"><h4>Твоя тарілка</h4><ul><li>крупа — повна порція</li><li>+ молочне, фрукт</li><li>+ залізо: яловичина, гречка, зелень, яйця, бобові</li><li>паливо для двох</li></ul></div>
+        </div>
+        <p class="note-soft">Рибу й м’ясо тобі — добре проготовані; солону/мариновану рибу краще відкласти. Калорії, залізо, добавки — за лікарем.</p>
+      </div>
+      <p class="eyebrow">Прості рецепти</p>
+      <div class="filterbar" id="recipeFilter">
+        <button class="fb" data-f="all" aria-pressed="true">Усі</button>
+        <button class="fb" data-f="сніданок" aria-pressed="false">Сніданок</button>
+        <button class="fb" data-f="обід" aria-pressed="false">Обід</button>
+        <button class="fb" data-f="вечеря" aria-pressed="false">Вечеря</button>
+        <button class="fb" data-f="батч" aria-pressed="false">Батч</button>
+      </div>
+      <div id="recipeList"></div>
+      <p class="eyebrow">Закупівлі — познач і винеси у нотатки</p>
+      <div class="card">
+        <div class="rowflex" style="margin-bottom:12px">
+          <input class="fld" id="addProd" placeholder="Додати свій продукт…" style="flex:1;min-width:160px">
+          <button class="btn sm" id="addProdBtn">Додати</button>
+        </div>
+        <div class="shop" id="shopList"></div>
+        <div class="rowflex" style="margin-top:12px">
+          <button class="btn amber sm" id="copyShop">Копіювати позначене</button>
+          <button class="btn ghost sm" id="keepShop">Відкрити Google Keep</button>
+          <button class="btn ghost sm" id="dlShop">Завантажити .txt</button>
+          <button class="btn ghost sm" id="shopReset">Скинути галочки</button>
+        </div>
+        <p class="note-soft">«Копіювати позначене» кладе список у буфер — далі вставляєш у Keep чи нотатки.</p>
+      </div>
+    </section>
+
+    <!-- BOOKS -->
+    <section class="view" id="v-books">
+      <p class="eyebrow">Полиця — якісний нонфікшн, без сопливих романів</p>
+      <div class="card" style="margin-bottom:14px">
+        <div class="addgrid" style="grid-template-columns:1fr 1fr 150px auto">
+          <div><label>Назва</label><input class="fld" id="nbTitle" placeholder="Назва книги"></div>
+          <div><label>Автор</label><input class="fld" id="nbAuthor" placeholder="Автор"></div>
+          <div><label>Категорія</label><select class="fld" id="nbCat"></select></div>
+          <div><button class="btn" id="nbAdd">Додати</button></div>
+        </div>
+      </div>
+      <div class="filterbar" id="bookFilter"></div>
+      <div id="bookList"></div>
+      <p class="note-soft">Клік по назві — опис, посилання й нотатки для самарі. Статус гортається: у черзі → читаю/слухаю → прочитано.</p>
+    </section>
+
+    <!-- WEEKEND -->
+    <section class="view" id="v-weekend">
+      <div class="roulette">
+        <div class="rlabel">Що робимо у вихідний</div>
+        <div class="rpick" id="rPick">Крутни →</div>
+        <div class="rwhy" id="rWhy">Без прогулянок і велосипеда — як Спектр любить.</div>
+        <button id="rBtn">Крутнути рулетку</button>
+      </div>
+      <p class="eyebrow">Ідеї · не гуляти, не на велосипеді</p>
+      <div class="grid g2" id="ideaGrid"></div>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="view" id="v-activity">
+      <div class="card" style="margin-bottom:14px">
+        <h3>Рух під час вагітності</h3>
+        <p style="font-size:13.5px;color:var(--muted);margin:0">Збери своє тренування: познач вправи → скопіюй або поклади в план дня. Орієнтуйся на самопочуття. Усе узгоджуй з лікарем (Шумський Ю. І.). Загальні застереження 3-го триместру: не лежати довго на спині й на животі, без затримки дихання (вальсальва), без максимальних ваг, стрибків і ризику падінь.</p>
+      </div>
+      <div class="acttray card" id="actTray"></div>
+      <div class="filterbar" id="actFilter"></div>
+      <div id="actList"></div>
+      <p class="note-soft">«З власною вагою» — за мотивами darebee.com (там є пренатальні програми). Це орієнтир, а не медичні рекомендації.</p>
+    </section>
+
+    <!-- AFFAIRS -->
+    <section class="view" id="v-affairs">
+      <p class="eyebrow">Живі чек-листи — пункти, дати (вони видні в календарі), цілі списки</p>
+      <div class="newcl">
+        <input class="fld" id="newClTitle" placeholder="Назва нового чек-листа (напр. «Дитячі покупки»)">
+        <button class="btn" id="newClBtn">Створити чек-лист</button>
+      </div>
+      <div id="affairsBody"></div>
+    </section>
+  </main>
+  <p class="foot">Живий дашборд · усе зберігається на цьому пристрої · не синхронізується між пристроями</p>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dhd"><button class="close" id="drawerClose" aria-label="Закрити">✕</button>
+    <div class="dt" id="drawerTitle"></div><div class="ds" id="drawerSub"></div></div>
+  <div class="dbody" id="drawerBody"></div>
+</aside>
+
+<script>
+/* ===== storage =====
+   Стан тримається в памʼяті (`state`) як єдине джерело правди під час сесії.
+   loadState() гідрує його з бекенду на старті; saveState() — єдина точка,
+   куди підключиться синхронізація з Google Drive (див. decision-синхронізація.md). */
+
+// Усі ключі стану «Ясно». Цей список — джерело правди для синхронізації (один JSON у Drive).
+const STATE_KEYS=['tasks','events','log','affairs','dayplans','seeded','shop','shopCustom','books','bookState','tabs'];
+
+// Низькорівневий бекенд: window.storage → localStorage → памʼять (fallback).
+const _memBackend={};
+const backend={
+  async get(k){
+    try{ if(typeof window!=='undefined'&&window.storage){const r=await window.storage.get(k);return r?JSON.parse(r.value):undefined;} }catch(e){}
+    try{ const v=localStorage.getItem('yo:'+k); if(v!=null)return JSON.parse(v);}catch(e){}
+    return (k in _memBackend)?_memBackend[k]:undefined;
+  },
+  async set(k,v){
+    _memBackend[k]=v;
+    try{ if(typeof window!=='undefined'&&window.storage){await window.storage.set(k,JSON.stringify(v));return;} }catch(e){}
+    try{ localStorage.setItem('yo:'+k,JSON.stringify(v)); }catch(e){}
+  }
+};
+
+// Стан у памʼяті.
+let state={};
+
+// Завантажити весь стан із бекенду в памʼять. Викликати один раз на старті.
+async function loadState(){
+  state={};
+  for(const k of STATE_KEYS){const v=await backend.get(k);if(v!==undefined)state[k]=v;}
+  const u=await backend.get('updatedAt');if(u!==undefined)state.updatedAt=u;
+  return state;
+}
+
+// Зберегти знімок стану. Локально пишемо по-ключу (через store.set); тут — мітка часу
+// й (у майбутньому) пуш у Google Drive. Дебаунситься через scheduleSave().
+let _saveTimer=null;
+async function saveState(){
+  state.updatedAt=Date.now();
+  await backend.set('updatedAt',state.updatedAt);
+  const snapshot=JSON.stringify(state); // те, що піде у yasno-state.json
+  // TODO(sync, Google Drive): записати snapshot у yasno-state.json + стратегія конфліктів за updatedAt.
+  return snapshot;
+}
+function scheduleSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveState,300);}
+
+// Сумісний шар: усі наявні виклики йдуть через store.get/set без змін.
+const store={
+  async get(k,def){return (k in state)?state[k]:def;},
+  async set(k,v){state[k]=v;await backend.set(k,v);scheduleSave();}
+};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DOW=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+const DOWfull=['Неділя','Понеділок','Вівторок','Середа','Четвер','П’ятниця','Субота'];
+const MON=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+const MONn=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=k=>{const[y,m,dd]=k.split('-').map(Number);return new Date(y,m-1,dd)};
+const today=new Date();today.setHours(0,0,0,0);
+const sameDay=(a,b)=>key(a)===key(b);
+const uid=()=>Math.random().toString(36).slice(2,9);
+function startOfWeek(d){const x=new Date(d);const w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);x.setHours(0,0,0,0);return x;}
+const GS=5,GE=24,PXH=42,TLH=46;
+function mins(t){if(!t)return null;const[a,b]=t.split(':').map(Number);return a*60+b;}
+function fmtMin(m){m=((Math.round(m)%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60);}
+function geom(start,end,pxh){
+  let s=mins(start);if(s==null)return null;let e=mins(end);
+  if(e==null)e=s+60;else if(e<=s)e+=1440;
+  const top=(s-GS*60)/60*pxh;
+  const visEnd=Math.min(GE*60,e);
+  const h=Math.max(20,(visEnd-Math.max(GS*60,s))/60*pxh);
+  return {top:Math.max(0,top),h};
+}
+
+const PRIOS=[
+  {id:'vag',rank:1,c:'#C97B84',n:'Вагітність і дитина',sh:'Вагітність',track:true},
+  {id:'spektr',rank:2,c:'#E0913A',n:'Спектр і відносини',sh:'Спектр',track:true},
+  {id:'health',rank:3,c:'#3E6B7A',n:'Здоров’я і харчування',sh:'Здоров’я',track:true},
+  {id:'move',rank:4,c:'#2E6E5A',n:'Тренування й активність',sh:'Рух',track:true},
+  {id:'read',rank:5,c:'#6E6A8A',n:'Книги й саморозвиток',sh:'Книги',track:true},
+  {id:'work',rank:6,c:'#4A4A4A',n:'Робота Supplax',sh:'Supplax',track:false},
+  {id:'fund',rank:7,c:'#1F3A34',n:'Фандрейзинг Грегіт',sh:'Грегіт',track:false}
+];
+const P=Object.fromEntries(PRIOS.map(p=>[p.id,p]));
+const TRACKED=PRIOS.filter(p=>p.track);
+
+const DEFAULT_TASKS=[
+  {id:'t7',title:'Річка: рух + плавання',prio:'move',target:5,start:'05:00',end:'06:30',notes:''},
+  {id:'t1',title:'Курс/стаття по пологах',prio:'vag',target:5,start:'07:30',end:'08:15',notes:''},
+  {id:'t13',title:'Готування / батч',prio:'health',target:3,start:'08:15',end:'10:00',notes:''},
+  {id:'t5',title:'Обід за планом',prio:'health',target:6,start:'12:00',end:'12:45',notes:''},
+  {id:'t2',title:'Денний сон',prio:'vag',target:5,start:'13:00',end:'14:45',notes:'Без нього план А не працює'},
+  {id:'t8',title:'Мобільність / тазове дно',prio:'move',target:3,start:'15:00',end:'15:45',notes:''},
+  {id:'t10',title:'Зміна Supplax',prio:'work',target:5,start:'16:00',end:'01:00',notes:'до 01:00, мікропаузи 1.5 год'},
+  {id:'t3',title:'Вечеря зі Спектром',prio:'spektr',target:5,start:'19:00',end:'19:30',notes:'пауза в Supplax'},
+  {id:'t9',title:'Читання / аудіокнига',prio:'read',target:5,start:'21:30',end:'22:15',notes:''},
+  {id:'t4',title:'Готувати для Спектра',prio:'spektr',target:3,start:'',end:'',notes:''},
+  {id:'t6',title:'Вода — режим',prio:'health',target:7,start:'',end:'',notes:''},
+  {id:'t12',title:'Задача по фандрейзингу',prio:'fund',target:1,start:'',end:'',notes:''}
+];
+
+/* ===== header ===== */
+function pregInfo(){const a=new Date(2026,5,28);a.setHours(0,0,0,0);const ad=28*7+5;const diff=Math.round((today-a)/864e5);const td=ad+diff;const wk=Math.floor(td/7),dy=td%7;const edd=new Date(a);edd.setDate(edd.getDate()+(280-ad));return {wk,dy,edd,left:Math.round((edd-today)/864e5)};}
+function renderDawn(){const p=pregInfo();const wed=new Date(2026,5,17);const dm=Math.round((today-wed)/864e5);
+  $('#todayCard').innerHTML=`<div class="tcl">Сьогодні</div><div class="tcd">${DOWfull[today.getDay()]}</div><div class="tcb">${today.getDate()} ${MON[today.getMonth()]}</div>`;
+  $('#dawn').innerHTML=`
+    <div class="pill rose"><div class="lbl">Вагітність</div><div class="val">${p.wk}<small> тиж </small>${p.dy}<small> дн</small></div></div>
+    <div class="pill"><div class="lbl">До зустрічі (≈ПДР)</div><div class="val">${p.left}<small> днів</small></div></div>
+    <div class="pill"><div class="lbl">Орієнтовна дата</div><div class="val" style="font-size:17px">${p.edd.getDate()} ${MON[p.edd.getMonth()]}</div></div>
+    <div class="pill" id="nextPill"><div class="lbl">Найближча подія</div><div class="val" style="font-size:15px">—</div></div>
+    <div class="pill"><div class="lbl">Одружені</div><div class="val">${dm}<small> днів</small></div></div>`;
+  fillNextPill();}
+async function fillNextPill(){const el=$('#nextPill');if(!el)return;const ev=await getEvents();const aff=await affairsByDate();const rows=[];
+  Object.keys(ev).forEach(k=>{const d=parse(k);if(d>=today)ev[k].forEach(e=>{if(e.important)rows.push({d,title:e.title});});});
+  Object.keys(aff).forEach(k=>{const d=parse(k);if(d>=today)aff[k].forEach(x=>{if(!x.done)rows.push({d,title:x.title});});});
+  rows.sort((a,b)=>a.d-b.d);
+  if(!rows.length){el.querySelector('.val').innerHTML='нема';return;}
+  const r=rows[0];const days=Math.round((r.d-today)/864e5);const when=days===0?'сьогодні':days===1?'завтра':`за ${days} дн`;
+  el.querySelector('.val').innerHTML=`${esc(r.title).slice(0,22)}<small> · ${when}</small>`;}
+
+/* ===== data ===== */
+async function getTasks(){return await store.get('tasks',DEFAULT_TASKS);}
+async function setTasks(t){await store.set('tasks',t);}
+async function getEvents(){return await store.get('events',{});}
+async function setEvents(e){await store.set('events',e);}
+async function getLog(){return await store.get('log',{});}
+async function toggleLog(taskId,dk){const log=await getLog();log[dk]=log[dk]||{};log[dk][taskId]=!log[dk][taskId];if(!log[dk][taskId])delete log[dk][taskId];await store.set('log',log);return log;}
+function byTime(a,b){return (a.start||'99:99').localeCompare(b.start||'99:99');}
+async function getAffairs(){return await store.get('affairs',DEFAULT_AFFAIRS);}
+async function setAffairs(a){await store.set('affairs',a);}
+async function affairsByDate(){const a=await getAffairs();const out={};Object.entries(a).forEach(([sid,sec])=>sec.items.forEach(it=>{if(it.due){out[it.due]=out[it.due]||[];out[it.due].push({id:it.id,sid,title:it.t,sec:sec.title,done:it.done,start:it.start||'',end:it.end||''});}}));return out;}
+
+/* ===== per-day plan overrides (do NOT touch the Priorities template) ===== */
+async function getDayPlans(){return await store.get('dayplans',{});}
+async function setDayPlans(d){await store.set('dayplans',d);}
+async function getDay(dk){const d=await getDayPlans();return d[dk]||{removed:{},over:{},add:[]};}
+async function saveDay(dk,patch){const d=await getDayPlans();const cur=d[dk]||{removed:{},over:{},add:[]};d[dk]={removed:{...cur.removed},over:{...cur.over},add:[...(cur.add||[])],...patch};await setDayPlans(d);}
+// effective plan for a given day = template − removed + per-day overrides + day-only tasks
+async function effectivePlan(dk){const tpl=await getTasks();const dp=await getDay(dk);
+  const base=tpl.filter(t=>!dp.removed[t.id]).map(t=>({...t,...(dp.over[t.id]||{}),origin:'tpl'}));
+  const extra=(dp.add||[]).map(t=>({...t,origin:'day'}));
+  return [...base,...extra];}
+// edit one task on one day (template task -> stored as override; day task -> edit add[])
+async function editDayTask(dk,id,origin,patch){const d=await getDayPlans();const cur=d[dk]||{removed:{},over:{},add:[]};
+  if(origin==='day'){cur.add=(cur.add||[]).map(t=>t.id===id?{...t,...patch}:t);}
+  else{cur.over=cur.over||{};cur.over[id]={...(cur.over[id]||{}),...patch};}
+  d[dk]=cur;await setDayPlans(d);}
+async function removeDayTask(dk,id,origin){const d=await getDayPlans();const cur=d[dk]||{removed:{},over:{},add:[]};
+  if(origin==='day'){cur.add=(cur.add||[]).filter(t=>t.id!==id);}
+  else{cur.removed=cur.removed||{};cur.removed[id]=true;if(cur.over)delete cur.over[id];}
+  d[dk]=cur;await setDayPlans(d);}
+
+/* ===== overlap packing for conflict layout ===== */
+function packBlocks(blocks){ // assigns .col .cols (layout) and .conflict (true overlap, ignoring long background blocks)
+  const BG=300; // a block >=5h (e.g. Supplax shift) is "background": laid out beside others but not flagged as a clash
+  const items=blocks.map(b=>{let s=mins(b.start);let e=mins(b.end);if(e==null)e=(s!=null?s+60:null);else if(e<=s)e+=1440;return {...b,_s:s,_e:e,_bg:(s!=null&&e!=null&&(e-s)>=BG)};}).filter(b=>b._s!=null);
+  items.sort((a,b)=>a._s-b._s||a._e-b._e);
+  let cluster=[],clMaxEnd=-1;const out=[];
+  const flush=()=>{const cols=[];cluster.forEach(it=>{let placed=false;for(let i=0;i<cols.length;i++){if(cols[i]<=it._s){it.col=i;cols[i]=it._e;placed=true;break;}}if(!placed){it.col=cols.length;cols.push(it._e);}});const n=cols.length;
+    cluster.forEach(it=>{it.cols=n;it.conflict=false;if(it._bg)return;cluster.forEach(o=>{if(o!==it&&!o._bg&&it._s<o._e&&o._s<it._e)it.conflict=true;});});
+    out.push(...cluster);cluster=[];};
+  items.forEach(it=>{if(cluster.length&&it._s>=clMaxEnd){flush();clMaxEnd=-1;}cluster.push(it);clMaxEnd=Math.max(clMaxEnd,it._e);});
+  if(cluster.length)flush();
+  return out;}
+
+async function weekStats(){const tasks=await getTasks(),log=await getLog();const ws=startOfWeek(today);const days=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);days.push(key(d));}
+  const elapsed=Math.min(7,Math.round((today-ws)/864e5)+1);const pace=elapsed/7;const byPrio={};PRIOS.forEach(p=>byPrio[p.id]={done:0,target:0});
+  tasks.forEach(t=>{if(!byPrio[t.prio])return;byPrio[t.prio].target+=t.target;days.forEach(dk=>{if(log[dk]&&log[dk][t.id])byPrio[t.prio].done++;});});return {byPrio,pace};}
+
+/* ===== TODAY (any day, via viewDay) ===== */
+let todayMode='grid';
+let viewDay=new Date(today);
+function nowLineStyle(date){if(!sameDay(date,new Date()))return 'display:none';const n=new Date();const m=n.getHours()*60+n.getMinutes();if(m<GS*60||m>GE*60)return 'display:none';return `top:${(m-GS*60)/60*TLH}px`;}
+function blkStyle(b,g){const w=100/(b.cols||1);const left=(b.col||0)*w;return `top:${g.top}px;height:${g.h}px;--bc:${b._col};left:calc(${left}% + ${b.col?2:0}px);width:calc(${w}% - 3px)`;}
+async function renderToday(){
+  const dk=key(viewDay);const plan=await effectivePlan(dk);const log=await getLog();const st=log[dk]||{};const ev=(await getEvents())[dk]||[];const affD=(await affairsByDate())[dk]||[];
+  const isToday=sameDay(viewDay,today);
+  $('#checkTitle').innerHTML=`${DOWfull[viewDay.getDay()]}, ${viewDay.getDate()} ${MON[viewDay.getMonth()]}`+(isToday?'<span class="dayflag today">сьогодні</span>':`<span class="dayflag other">${viewDay<today?'минуле':'план'}</span>`);
+  $('#dayNav').className='daynav'+(viewDay>today?' future':viewDay<today?' past':'');
+  await renderDayAdd(dk,plan);
+  const host=$('#todayList');
+  // build timed blocks (tasks + timed events + timed affairs) and all-day chips
+  const blocks=[];
+  plan.filter(t=>t.start).forEach(t=>blocks.push({kind:'task',id:t.id,origin:t.origin,title:t.title,_col:P[t.prio]?P[t.prio].c:'#999',start:t.start,end:t.end,notes:t.notes,done:!!st[t.id]}));
+  ev.filter(e=>e.t).forEach(e=>blocks.push({kind:'event',id:e.id,title:e.title,_col:P[e.cat]?P[e.cat].c:'#999',start:e.t,end:e.end,star:e.important}));
+  affD.filter(a=>a.start).forEach(a=>blocks.push({kind:'aff',id:a.id,sid:a.sid,title:'📋 '+a.title,_col:'#707A72',start:a.start,end:a.end,done:a.done}));
+  const packed=packBlocks(blocks);
+  const conflicts=packed.filter(b=>b.conflict).length;
+  $('#dayConflict').innerHTML=conflicts?`<div class="conflict-note">⚠️ <span>Є накладки в часі — блоки, що перетинаються, стоять поруч і підсвічені. Зміна Supplax не рахується (це фон).</span></div>`:'';
+  if(todayMode==='grid'){
+    const allDay=[];ev.filter(e=>!e.t).forEach(e=>allDay.push({title:e.title,star:e.important,cat:e.cat}));affD.filter(a=>!a.start).forEach(x=>allDay.push({title:'📋 '+x.title,done:x.done}));
+    let hrs='';for(let h=GS;h<=GE;h++)hrs+=`<div class="hr"><span>${pad(h%24)}:00</span></div>`;
+    const blkHtml=packed.map(b=>{const g=geom(b.start,b.end,TLH);if(!g)return '';
+      return `<div class="tblock ${b.kind} ${b.done?'done':''} ${b.conflict?'conflict':''}" data-kind="${b.kind}" data-id="${b.id}" data-origin="${b.origin||''}" data-sid="${b.sid||''}" style="${blkStyle(b,g)}">
+        ${b.conflict?'<span class="warnbadge">⚠️</span>':''}
+        <div class="tb-in">${(b.kind==='task'||b.kind==='aff')?`<button class="tb-chk" data-act="chk">${b.done?'✓':''}</button>`:''}
+          <div class="tb-txt"><b>${b.star?'★ ':''}${esc(b.title)}</b><span class="tb-time">${b.start||''}${b.end?'–'+b.end:''}</span>${b.notes?`<span class="tb-note">📝 ${esc(b.notes)}</span>`:''}</div>
+          <div class="tb-ctl">${b.kind!=='aff'?'<button data-act="edit">✎</button>':''}<button data-act="del">✕</button></div></div>
+        <div class="tb-resize" data-act="resize"></div></div>`;}).join('');
+    host.innerHTML=`${allDay.length?`<div class="allday">${allDay.map(a=>`<span class="adchip ${a.done?'done':''}" style="${a.cat&&P[a.cat]?`border-left-color:${P[a.cat].c}`:''}">${a.star?'★ ':''}${esc(a.title)}</span>`).join('')}</div>`:''}
+      <div class="tgrid">${hrs}<div class="tblocks">${blkHtml}<div class="nowline" style="${nowLineStyle(viewDay)}"></div></div></div>`;
+    bindTimeline(host,dk);
+  } else if(todayMode==='list'){
+    const sorted=[...plan].sort(byTime);
+    host.innerHTML='<ul class="cl">'+sorted.map(t=>taskRow(t,st,'')).join('')+'</ul>';
+    bindRows(host,dk);
+  } else {
+    host.innerHTML=PRIOS.map(p=>{const list=plan.filter(t=>t.prio===p.id);if(!list.length)return '';
+      return `<div class="timehdr" style="color:${p.c}">${p.n}</div><ul class="cl">`+list.map(t=>taskRow(t,st,'')).join('')+'</ul>';}).join('');
+    bindRows(host,dk);
+  }
+  renderWeek();
+}
+async function renderDayAdd(dk,plan){
+  $('#daPrio').innerHTML=PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('');
+  // template tasks not currently in this day's plan (removed ones, or any not present)
+  const tpl=await getTasks();const present=new Set(plan.map(t=>t.id));
+  const avail=tpl.filter(t=>!present.has(t.id));
+  $('#daTpl').innerHTML=avail.length?avail.map(t=>`<option value="${t.id}">${esc(t.title)}${t.start?' · '+t.start:''} (${P[t.prio]?P[t.prio].sh:''})</option>`).join(''):'<option value="">— усі завдання вже в плані —</option>';
+  $('#daTplWrap').style.display=avail.length?'':'none';
+}
+function taskRow(t,st,extra){const time=t.start?`${t.start}${t.end?'–'+t.end:''}`:'—';
+  return `<li data-id="${t.id}" data-origin="${t.origin||''}" class="${st[t.id]?'done':''}">
+    <span class="box">${st[t.id]?'✓':''}</span>
+    <span class="pcdot" style="background:${P[t.prio]?P[t.prio].c:'#ccc'}"></span>
+    <span class="etime ${t.start?'':'none'}">${time}</span>
+    <span class="txt">${esc(t.title)}${todayMode==='list'?` <span class="meta">· ${P[t.prio]?P[t.prio].sh:''}</span>`:''}${t.notes?`<span class="tnote">📝 ${esc(t.notes)}</span>`:''}</span>
+    <span class="ctrl">${extra||''}<button data-act="edit" title="Змінити">✎</button><button class="x" data-act="del" title="Прибрати з дня">✕</button></span></li>`;}
+function bindRows(host,dk){host.querySelectorAll('li').forEach(li=>{const id=li.dataset.id,origin=li.dataset.origin;
+  li.querySelector('.box').onclick=async()=>{const l=await toggleLog(id,dk);const on=!!(l[dk]&&l[dk][id]);li.classList.toggle('done',on);li.querySelector('.box').textContent=on?'✓':'';renderWeek();};
+  li.querySelector('[data-act="edit"]').onclick=()=>openTaskEditor(id,{scope:'day',dk,origin});
+  li.querySelector('[data-act="del"]').onclick=async()=>{await removeDayTask(dk,id,origin);afterPlan();};});}
+function bindTimeline(host,dk){
+  host.querySelectorAll('.tblock').forEach(bl=>{
+    const kind=bl.dataset.kind,id=bl.dataset.id,origin=bl.dataset.origin,sid=bl.dataset.sid;
+    const chk=bl.querySelector('[data-act="chk"]');if(chk)chk.addEventListener('click',async e=>{e.stopPropagation();
+      if(kind==='aff'){const a2=await getAffairs();const it=(a2[sid]?.items||[]).find(x=>x.id===id);if(it){it.done=!it.done;await setAffairs(a2);}afterPlan();renderAffairs();}
+      else{await toggleLog(id,dk);renderToday();}});
+    const edb=bl.querySelector('[data-act="edit"]');if(edb)edb.addEventListener('click',e=>{e.stopPropagation();if(kind==='task')openTaskEditor(id,{scope:'day',dk,origin});else openEventEditor(dk,id);});
+    bl.querySelector('[data-act="del"]').addEventListener('click',async e=>{e.stopPropagation();
+      if(kind==='task'){await removeDayTask(dk,id,origin);}
+      else if(kind==='aff'){const a2=await getAffairs();const it=(a2[sid]?.items||[]).find(x=>x.id===id);if(it){it.start='';it.end='';await setAffairs(a2);}renderAffairs();}
+      else{const ev=await getEvents();ev[dk]=(ev[dk]||[]).filter(x=>x.id!==id);if(!ev[dk].length)delete ev[dk];await setEvents(ev);}afterPlan();});
+    let startY,origTop,origH,mode=null;
+    const onMove=e=>{const dy=e.clientY-startY;if(mode==='move')bl.style.top=Math.max(0,origTop+dy)+'px';else if(mode==='resize')bl.style.height=Math.max(20,origH+dy)+'px';};
+    const onUp=async()=>{document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);bl.classList.remove('dragging');
+      const topPx=parseFloat(bl.style.top),hPx=parseFloat(bl.style.height);const snap=15;
+      let sMin=GS*60+Math.round(topPx/TLH*60/snap)*snap;let dMin=Math.max(15,Math.round(hPx/TLH*60/snap)*snap);
+      sMin=Math.max(GS*60,Math.min(GE*60-15,sMin));const ns=fmtMin(sMin),ne=fmtMin(sMin+dMin);
+      if(kind==='task'){await editDayTask(dk,id,origin,{start:ns,end:ne});}
+      else if(kind==='aff'){const a2=await getAffairs();const it=(a2[sid]?.items||[]).find(x=>x.id===id);if(it){it.start=ns;it.end=ne;}await setAffairs(a2);}
+      else{const ev=await getEvents();const x=(ev[dk]||[]).find(y=>y.id===id);if(x){x.t=ns;x.end=ne;}await setEvents(ev);}afterPlan();};
+    const down=(e,m)=>{if(e.target.closest('button')&&m==='move')return;e.preventDefault();mode=m;startY=e.clientY;origTop=parseFloat(bl.style.top)||0;origH=parseFloat(bl.style.height)||40;bl.classList.add('dragging');document.addEventListener('pointermove',onMove);document.addEventListener('pointerup',onUp);};
+    bl.addEventListener('pointerdown',e=>down(e,'move'));
+    const rz=bl.querySelector('[data-act="resize"]');if(rz)rz.addEventListener('pointerdown',e=>{e.stopPropagation();down(e,'resize');});
+  });
+}
+/* day navigation + add-to-day */
+$('#dayPrev').onclick=()=>{viewDay.setDate(viewDay.getDate()-1);viewDay=new Date(viewDay);renderToday();};
+$('#dayNext').onclick=()=>{viewDay.setDate(viewDay.getDate()+1);viewDay=new Date(viewDay);renderToday();};
+$('#dayToday').onclick=()=>{viewDay=new Date(today);renderToday();};
+$('#daAdd').onclick=async()=>{const title=$('#daTitle').value.trim();if(!title)return $('#daTitle').focus();const dk=key(viewDay);const d=await getDay(dk);d.add=d.add||[];d.add.push({id:uid(),title,prio:$('#daPrio').value,start:$('#daStart').value,end:$('#daEnd').value,notes:''});await saveDay(dk,{add:d.add});$('#daTitle').value='';$('#daStart').value='';$('#daEnd').value='';afterPlan();};
+$('#daTitle').addEventListener('keydown',e=>{if(e.key==='Enter')$('#daAdd').click();});
+$('#daTplAdd').onclick=async()=>{const id=$('#daTpl').value;if(!id)return;const dk=key(viewDay);const d=await getDay(dk);if(d.removed&&d.removed[id]){delete d.removed[id];await saveDay(dk,{removed:d.removed});}else{await saveDay(dk,{});}afterPlan();};
+async function moveTask(id,dir){const tasks=await getTasks();const t=tasks.find(x=>x.id===id);if(!t)return;const same=tasks.filter(x=>x.prio===t.prio);const pos=same.indexOf(t);const sw=same[pos+dir];if(!sw)return;const i1=tasks.indexOf(t),i2=tasks.indexOf(sw);[tasks[i1],tasks[i2]]=[tasks[i2],tasks[i1]];await setTasks(tasks);renderToday();renderTasks();}
+async function renderWeek(){const {byPrio,pace}=await weekStats();
+  $('#wkProgress').innerHTML=TRACKED.map(p=>{const b=byPrio[p.id];const tgt=b.target||0,done=b.done;const pct=tgt?Math.min(100,Math.round(done/tgt*100)):0;const expected=tgt*pace;let cls='tag-under';if(done>=tgt&&tgt>0)cls='tag-over';else if(done>=expected)cls='tag-ok';if(tgt===0)cls='';
+    return `<div class="wk-prio"><div class="nm" style="color:${p.c}">${p.n}</div><div class="bar"><span style="width:${pct}%;background:${p.c}"></span><span class="pace" style="left:${Math.min(100,pace*100)}%"></span></div><div class="stat ${cls}">${done}/${tgt}</div></div>`;}).join('');
+  $('#wkSummary').innerHTML=TRACKED.map(p=>{const b=byPrio[p.id];const tgt=b.target||0,done=b.done;if(tgt===0)return '';let label,cls;if(done>=tgt){label=done>tgt?'перебрала':'виконано';cls='tag-over';}else if(done>=tgt*pace){label='у нормі';cls='tag-ok';}else{label='недобрала';cls='tag-under';}
+    return `<div class="wk-prio"><div class="nm" style="color:${p.c}">${p.n}</div><div class="stat ${cls}" style="flex:1;text-align:left;padding-left:6px">${label}</div><div class="stat">${done}/${tgt}</div></div>`;}).join('');}
+$$('#todayMode button').forEach(b=>b.onclick=()=>{todayMode=b.dataset.m;$$('#todayMode button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderToday();});
+
+/* ===== editors ===== */
+async function openTaskEditor(id,ctx){const scope=ctx?ctx.scope:'template';
+  let t;
+  if(scope==='day'){const plan=await effectivePlan(ctx.dk);t=plan.find(x=>x.id===id);}
+  else{t=(await getTasks()).find(x=>x.id===id);}
+  if(!t)return;
+  $('#drawerTitle').textContent='Змінити завдання';
+  $('#drawerSub').textContent=scope==='day'?`лише на ${parse(ctx.dk).getDate()} ${MON[parse(ctx.dk).getMonth()]} · не змінює «Пріоритети»`:'шаблон · впливає на наступні дні';
+  $('#drawerBody').innerHTML=`<div class="dform">
+    <label>Назва</label><input id="etTitle" value="${esc(t.title)}">
+    <div class="two"><div><label>Від</label><input id="etStart" type="time" value="${t.start||''}"></div><div><label>До</label><input id="etEnd" type="time" value="${t.end||''}"></div></div>
+    <label>Пріоритет</label><select id="etPrio">${PRIOS.map(p=>`<option value="${p.id}" ${p.id===t.prio?'selected':''}>${p.n}</option>`).join('')}</select>
+    ${scope==='template'?`<label>Разів на тиждень</label><input id="etTarget" type="number" min="1" max="21" value="${t.target||1}">`:''}
+    <label>Нотатки</label><textarea id="etNotes" placeholder="Деталі, нагадування…">${esc(t.notes||'')}</textarea>
+    <button class="btn" id="etSave" style="width:100%;margin-top:14px">Зберегти</button>
+    <button class="btn ghost danger" id="etDel" style="width:100%;margin-top:8px">${scope==='day'?'Прибрати з цього дня':'Видалити завдання'}</button></div>`;
+  $('#etSave').onclick=async()=>{const patch={title:$('#etTitle').value.trim()||t.title,start:$('#etStart').value,end:$('#etEnd').value,prio:$('#etPrio').value,notes:$('#etNotes').value};
+    if(scope==='day'){await editDayTask(ctx.dk,id,ctx.origin,patch);}
+    else{const ts=await getTasks();const x=ts.find(y=>y.id===id);if(x){Object.assign(x,patch);x.target=Math.max(1,+$('#etTarget').value||1);}await setTasks(ts);}
+    closeDrawer();afterPlan();};
+  $('#etDel').onclick=async()=>{
+    if(scope==='day'){await removeDayTask(ctx.dk,id,ctx.origin);}
+    else{const ts=(await getTasks()).filter(y=>y.id!==id);await setTasks(ts);}
+    closeDrawer();afterPlan();};
+  openDrawer();
+}
+async function openEventEditor(dk,id){const ev=await getEvents();const e=(ev[dk]||[]).find(x=>x.id===id);if(!e)return;
+  $('#drawerTitle').textContent='Змінити подію';$('#drawerSub').textContent=`${parse(dk).getDate()} ${MON[parse(dk).getMonth()]}`;
+  $('#drawerBody').innerHTML=`<div class="dform">
+    <label>Що</label><input id="eeTitle" value="${esc(e.title)}">
+    <div class="two"><div><label>Від</label><input id="eeStart" type="time" value="${e.t||''}"></div><div><label>До</label><input id="eeEnd" type="time" value="${e.end||''}"></div></div>
+    <label>Категорія</label><select id="eeCat">${PRIOS.map(p=>`<option value="${p.id}" ${p.id===e.cat?'selected':''}>${p.n}</option>`).join('')}<option value="admin" ${e.cat==='admin'?'selected':''}>Інше / адмін</option></select>
+    <label class="star-toggle"><input type="checkbox" id="eeStar" ${e.important?'checked':''}> Важлива дата (★)</label>
+    <button class="btn" id="eeSave" style="width:100%;margin-top:14px">Зберегти</button>
+    <button class="btn ghost danger" id="eeDel" style="width:100%;margin-top:8px">Видалити подію</button></div>`;
+  $('#eeSave').onclick=async()=>{const ev2=await getEvents();const x=(ev2[dk]||[]).find(y=>y.id===id);if(!x)return;x.title=$('#eeTitle').value.trim()||x.title;x.t=$('#eeStart').value;x.end=$('#eeEnd').value;x.cat=$('#eeCat').value;x.important=$('#eeStar').checked;(ev2[dk]||[]).sort((a,b)=>(a.t||'').localeCompare(b.t||''));await setEvents(ev2);closeDrawer();afterPlan();};
+  $('#eeDel').onclick=async()=>{const ev2=await getEvents();ev2[dk]=(ev2[dk]||[]).filter(y=>y.id!==id);if(!ev2[dk].length)delete ev2[dk];await setEvents(ev2);closeDrawer();afterPlan();};
+  openDrawer();
+}
+async function afterPlan(){await renderToday();await renderCal();await renderPrioCards();await renderTasks();fillNextPill();}
+
+/* ===== PRIORITIES ===== */
+async function renderPrioCards(){const {byPrio}=await weekStats();
+  $('#prioCards').innerHTML=PRIOS.map(p=>{const b=byPrio[p.id];const tgt=b.target||0;const pct=tgt?Math.min(100,Math.round(b.done/tgt*100)):0;
+    const body=p.track?
+      `<div style="height:8px;border-radius:999px;background:var(--mist2);overflow:hidden;margin-top:10px"><span style="display:block;height:100%;width:${pct}%;background:${p.c}"></span></div>
+        <div style="font-family:Oswald;font-size:13px;color:var(--muted);margin-top:5px">${b.done}/${tgt} цього тижня</div>`:
+      `<div style="font-size:12px;color:var(--muted);margin-top:12px;font-style:italic">без трекінгу прогресу</div>`;
+    return `<div class="card" style="position:relative;overflow:hidden"><div style="position:absolute;top:-8px;right:6px;font-family:Oswald;font-weight:700;font-size:60px;color:var(--mist2);line-height:1">${p.rank}</div>
+      <div style="position:relative"><div style="font-weight:700;font-size:14.5px;color:${p.c}">${p.n}</div>${body}</div></div>`;}).join('');}
+async function renderTasks(){const tasks=await getTasks();
+  $('#ntPrio').innerHTML=PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('');
+  $('#taskList').innerHTML=PRIOS.map(p=>{const list=tasks.filter(t=>t.prio===p.id);
+    const rows=list.map((t,i)=>`<div class="tm-row" data-id="${t.id}">
+      <span class="ttl">${esc(t.title)}</span>${t.start?`<span class="tm-time">${t.start}${t.end?'–'+t.end:''}</span>`:''}<span class="tg">${t.target}×/тиж</span>
+      <button data-act="up" ${i===0?'style="visibility:hidden"':''}>↑</button><button data-act="down" ${i===list.length-1?'style="visibility:hidden"':''}>↓</button>
+      <button data-act="edit">✎</button><button class="x" data-act="del">✕</button></div>`).join('');
+    return `<div class="eyebrow" style="margin:14px 0 8px;color:${p.c}">${p.n}</div>${rows||'<p class="note-soft" style="margin:0 0 6px">Ще немає задач у цій категорії.</p>'}
+      <div class="catadd" data-cat="${p.id}">
+        <input class="fld" data-ci placeholder="+ задача в «${esc(p.sh)}»">
+        <input class="fld" data-cs type="time" title="від">
+        <input class="fld" data-ce type="time" title="до">
+        <input class="fld" data-ct type="number" min="1" max="21" value="3" title="разів/тиж">
+        <button class="btn sm" data-cadd>Додати</button>
+      </div>`;}).join('');
+  $('#taskList').querySelectorAll('.tm-row').forEach(r=>{const id=r.dataset.id;
+    r.querySelector('[data-act="edit"]').onclick=()=>openTaskEditor(id);
+    r.querySelector('[data-act="del"]').onclick=async()=>{const ts=(await getTasks()).filter(t=>t.id!==id);await setTasks(ts);afterPlan();};
+    r.querySelector('[data-act="up"]').onclick=()=>moveTask(id,-1);r.querySelector('[data-act="down"]').onclick=()=>moveTask(id,1);});
+  $('#taskList').querySelectorAll('.catadd').forEach(box=>{const cat=box.dataset.cat;
+    const ci=box.querySelector('[data-ci]'),cs=box.querySelector('[data-cs]'),ce=box.querySelector('[data-ce]'),ct=box.querySelector('[data-ct]');
+    const add=async()=>{const title=ci.value.trim();if(!title)return ci.focus();const ts=await getTasks();ts.push({id:uid(),title,prio:cat,target:Math.max(1,+ct.value||1),start:cs.value,end:ce.value,notes:''});await setTasks(ts);afterPlan();};
+    box.querySelector('[data-cadd]').onclick=add;ci.addEventListener('keydown',e=>{if(e.key==='Enter')add();});});}
+$('#ntAdd').onclick=async()=>{const title=$('#ntTitle').value.trim();if(!title)return $('#ntTitle').focus();const ts=await getTasks();ts.push({id:uid(),title,prio:$('#ntPrio').value,target:Math.max(1,+$('#ntTarget').value||1),start:$('#ntStart').value,end:$('#ntEnd').value,notes:''});await setTasks(ts);$('#ntTitle').value='';$('#ntStart').value='';$('#ntEnd').value='';afterPlan();};
+
+/* ===== CALENDAR ===== */
+let viewDate=new Date(today),viewMode='week';
+async function seedOnce(){const seeded=await store.get('seeded',{});if(!seeded.v1){const ev=await getEvents();const k='2026-07-04';ev[k]=ev[k]||[];ev[k].push({id:uid(),t:'09:00',end:'10:00',title:'Аналізи + документ на декрет (Перинатальний)',cat:'vag',important:true});await setEvents(ev);seeded.v1=true;await store.set('seeded',seeded);}}
+async function renderUpnext(){const ev=await getEvents();const aff=await affairsByDate();const rows=[];
+  Object.keys(ev).forEach(k=>{const d=parse(k);if(d>=today)ev[k].forEach(e=>rows.push({d,k,title:e.title,t:e.t,important:e.important,cat:e.cat}));});
+  Object.keys(aff).forEach(k=>{const d=parse(k);if(d>=today)aff[k].forEach(x=>{if(!x.done)rows.push({d,k,title:'📋 '+x.title,t:'',important:true,cat:'admin'});});});
+  rows.sort((a,b)=>a.d-b.d||(a.t||'').localeCompare(b.t||''));
+  const imp=rows.filter(r=>r.important);const list=(imp.length?imp:rows).slice(0,7);
+  $('#upnext').innerHTML=list.length?list.map(r=>{const days=Math.round((r.d-today)/864e5);const when=days===0?'сьогодні':days===1?'завтра':`за ${days} дн`;
+    return `<div class="up-row" data-k="${r.k}"><span class="ud">${r.d.getDate()} ${MON[r.d.getMonth()]}<br><span style="font-size:11px;color:var(--muted)">${when}</span></span><span class="ut">${r.important?'<span class="star">★</span> ':''}${esc(r.title)}</span>${r.t?`<span class="chip" style="background:${P[r.cat]?P[r.cat].c:'#999'}">${r.t}</span>`:''}</div>`;}).join(''):'<p class="up-empty">Поки порожньо. Додай дату в календарі або у «Справах».</p>';
+  $('#upnext').querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>openDay(el.dataset.k));}
+
+async function renderCal(){
+  $$('#v-cal .seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===viewMode));
+  await renderUpnext();
+  const body=$('#calBody'),title=$('#calTitle'),ev=await getEvents(),aff=await affairsByDate();
+  if(viewMode==='day'||viewMode==='week'){
+    const isDay=viewMode==='day';
+    const days=isDay?[new Date(viewDate)]:[...Array(7)].map((_,i)=>{const s=startOfWeek(viewDate);const d=new Date(s);d.setDate(s.getDate()+i);return d;});
+    const plansByDay={};for(const d of days){plansByDay[key(d)]=await effectivePlan(key(d));}
+    title.textContent=isDay?`${days[0].getDate()} ${MON[days[0].getMonth()]}`:`${days[0].getDate()} ${MON[days[0].getMonth()]} – ${days[6].getDate()} ${MON[days[6].getMonth()]}`;
+    let hgut='';for(let h=GS;h<=GE;h++)hgut+=`<div class="gh"><span>${pad(h%24)}:00</span></div>`;
+    const cols=isDay?'48px minmax(0,1fr)':'48px repeat(7,minmax(96px,1fr))';
+    const head=`<div class="wkhead" style="grid-template-columns:${cols}"><div class="gut"></div>`+days.map(d=>`<div class="wh ${sameDay(d,today)?'today':''}" data-k="${key(d)}"><div class="dw">${DOW[d.getDay()]}</div><div class="dn">${d.getDate()}</div></div>`).join('')+`</div>`;
+    const adRow=`<div class="wkad" style="grid-template-columns:${cols}"><div class="gut">весь день</div>`+days.map(d=>{const dk=key(d);const ad=[];(ev[dk]||[]).filter(e=>!e.t).forEach(e=>ad.push({title:e.title,star:e.important,cat:e.cat}));(aff[dk]||[]).filter(x=>!x.start).forEach(x=>ad.push({title:'📋 '+x.title,done:x.done}));
+      return `<div class="adcell" data-k="${dk}">${ad.map(a=>`<span class="adchip ${a.done?'done':''}" style="${a.cat&&P[a.cat]?`border-left-color:${P[a.cat].c}`:''}">${a.star?'★':''}${esc(a.title).slice(0,18)}</span>`).join('')}</div>`;}).join('')+`</div>`;
+    const cells=days.map(d=>{const dk=key(d);const blks=[];
+      plansByDay[dk].filter(t=>t.start).forEach(t=>blks.push({kind:'task',title:t.title,_col:P[t.prio]?P[t.prio].c:'#999',start:t.start,end:t.end}));
+      (ev[dk]||[]).filter(e=>e.t).forEach(e=>blks.push({kind:'event',title:(e.important?'★ ':'')+e.title,_col:P[e.cat]?P[e.cat].c:'#999',start:e.t,end:e.end}));
+      (aff[dk]||[]).filter(a=>a.start).forEach(a=>blks.push({kind:'aff',title:'📋 '+a.title,_col:'#707A72',start:a.start,end:a.end}));
+      const packed=packBlocks(blks);
+      const bh=packed.map(b=>{const g=geom(b.start,b.end,PXH);if(!g)return '';const w=100/(b.cols||1),left=(b.col||0)*w;return `<div class="wblk ${b.kind} ${b.conflict?'conflict':''}" style="top:${g.top}px;height:${g.h}px;--bc:${b._col};left:calc(${left}% + 2px);width:calc(${w}% - 3px)">${b.conflict?'<span style="position:absolute;top:0;right:1px;font-size:9px">⚠️</span>':''}<b>${esc(b.title)}</b><span style="font-family:Oswald;font-size:9px;color:var(--muted)">${b.start}</span></div>`;}).join('');
+      let gh='';for(let h=GS;h<=GE;h++)gh+='<div class="gh"></div>';
+      return `<div class="wkcol ${sameDay(d,today)?'today':''}" data-k="${dk}">${gh}${bh}${sameDay(d,new Date())?`<div class="nowline" style="${nowLineStyle(d).replace(/top:(\d+(\.\d+)?)px/,(m,p)=>'top:'+(parseFloat(p)/TLH*PXH)+'px')}"></div>`:''}</div>`;}).join('');
+    body.innerHTML=`<div class="wkgrid-wrap">${head}${adRow}<div class="wkbody" style="grid-template-columns:${cols}"><div class="gutcol">${hgut}</div>${cells}</div></div>`;
+    body.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>openDay(el.dataset.k));
+  } else if(viewMode==='month'){
+    title.textContent=`${MONn[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+    const first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1);const s=startOfWeek(first);let cells='';
+    for(let i=0;i<42;i++){const d=new Date(s);d.setDate(s.getDate()+i);const out=d.getMonth()!==viewDate.getMonth();const dk=key(d);
+      const cs=ev[dk]||[];const ad=aff[dk]||[];const star=cs.some(e=>e.important)||ad.length>0;
+      const items=[...cs.map(e=>({t:e.important?'★':'•',x:e.title,c:P[e.cat]?P[e.cat].c:'#999'})),...ad.map(x=>({t:'📋',x:x.title,c:'#707A72'}))].slice(0,3);
+      const mini=items.map(it=>`<div class="mi" style="color:${it.c}">${it.t} ${esc(it.x).slice(0,12)}</div>`).join('');
+      const more=(cs.length+ad.length)>3?`<div class="mi" style="color:var(--muted)">+${cs.length+ad.length-3}</div>`:'';
+      cells+=`<div class="mday ${out?'out':''} ${sameDay(d,today)?'today':''}" data-k="${dk}"><span class="n">${d.getDate()}</span>${star?'<span class="star">★</span>':''}<div class="mini">${mini}${more}</div></div>`;}
+    body.innerHTML='<div class="month">'+DOW.slice(1).concat(DOW[0]).map(x=>`<div class="dow">${x}</div>`).join('')+cells+'</div>';
+    body.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>openDay(el.dataset.k));
+  } else {
+    title.textContent=`${viewDate.getFullYear()}`;let html='<div class="year">';
+    for(let m=0;m<12;m++){const days=new Date(viewDate.getFullYear(),m+1,0).getDate();const lead=(new Date(viewDate.getFullYear(),m,1).getDay()+6)%7;let g='';
+      for(let i=0;i<lead;i++)g+='<span></span>';
+      for(let dd=1;dd<=days;dd++){const d=new Date(viewDate.getFullYear(),m,dd);const dk=key(d);const has=(ev[dk]||[]).length>0||(aff[dk]||[]).length>0;const t=sameDay(d,today);g+=`<span class="${t?'tdy':has?'has':''}">${dd}</span>`;}
+      html+=`<div class="ymonth" data-m="${m}"><h4>${MONn[m]}</h4><div class="ygrid">${g}</div></div>`;}
+    body.innerHTML=html+'</div>';
+    body.querySelectorAll('[data-m]').forEach(el=>el.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),+el.dataset.m,1);viewMode='month';renderCal();});
+  }
+}
+async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.getDate()} ${MON[d.getMonth()]}`;$('#drawerSub').textContent=DOWfull[d.getDay()];
+  const ev=await getEvents();const cs=ev[k]||[];const aff=(await affairsByDate())[k]||[];const plan=(await effectivePlan(k)).filter(t=>t.start).sort(byTime);
+  $('#drawerBody').innerHTML=`
+    ${cs.length?'<p class="eyebrow" style="margin-top:0">Важливі події</p>'+cs.map(e=>`<div class="ev-row" data-eid="${e.id}"><span class="et">${e.t||'—'}${e.end?'–'+e.end:''}</span><span class="ex">${e.important?'★ ':''}${esc(e.title)}</span><button class="erm" data-rm="${e.id}">🗑</button></div>`).join(''):''}
+    ${aff.length?'<p class="eyebrow">Зі «Справ» на цей день</p>'+aff.map(x=>`<div class="ev-row aff ${x.done?'done':''}" data-affid="${x.id}" data-affsid="${x.sid}"><span class="achk">${x.done?'✓':''}</span><span class="ex">${esc(x.title)}${x.start?` <span style="font-family:Oswald;font-size:11px;color:var(--slate)">${x.start}${x.end?'–'+x.end:''}</span>`:''}<br><span style="font-size:11px;color:var(--muted)">${esc(x.sec)}</span></span></div>`).join(''):''}
+    <div class="dform" style="background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:6px">
+      <div class="two"><div><label>Від</label><input type="time" id="evTime"></div><div><label>До</label><input type="time" id="evEnd"></div></div>
+      <label>Що</label><input type="text" id="evTitle" placeholder="Чекап, УЗД, зустріч, дедлайн…">
+      <label>Категорія</label><select id="evCat">${PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('')}<option value="admin">Інше / адмін</option></select>
+      <label class="star-toggle"><input type="checkbox" id="evStar"> Важлива дата (★)</label>
+      <button class="btn" id="evAdd" style="width:100%;margin-top:12px">Додати подію</button></div>
+    <p class="eyebrow">План дня <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(клік — редагувати лише цей день)</span></p>
+    ${plan.map(t=>`<div class="ev-row plan" data-tid="${t.id}" data-torigin="${t.origin||''}"><span class="et">${t.start}${t.end?'–'+t.end:''}</span><span class="ex">${esc(t.title)}${t.notes?`<br><span style="font-size:11px;color:var(--muted)">📝 ${esc(t.notes)}</span>`:''}</span></div>`).join('')||'<p class="note-soft">Завдання з часом з’являться тут.</p>'}`;
+  $('#drawerBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const e=await getEvents();e[k]=(e[k]||[]).filter(x=>x.id!==b.dataset.rm);if(!e[k].length)delete e[k];await setEvents(e);openDay(k);renderCal();fillNextPill();});
+  $('#drawerBody').querySelectorAll('.ev-row[data-eid]').forEach(r=>r.querySelector('.ex').onclick=()=>openEventEditor(k,r.dataset.eid));
+  $('#drawerBody').querySelectorAll('.ev-row.aff').forEach(r=>r.querySelector('.achk').onclick=async()=>{const a2=await getAffairs();const it=(a2[r.dataset.affsid]?.items||[]).find(x=>x.id===r.dataset.affid);if(it){it.done=!it.done;await setAffairs(a2);}openDay(k);renderCal();renderToday();renderAffairs();fillNextPill();});
+  $('#drawerBody').querySelectorAll('.ev-row.plan').forEach(r=>r.querySelector('.ex').onclick=()=>openTaskEditor(r.dataset.tid,{scope:'day',dk:k,origin:r.dataset.torigin}));
+  $('#evAdd').onclick=async()=>{const t=$('#evTitle').value.trim();if(!t)return $('#evTitle').focus();const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:$('#evTime').value,end:$('#evEnd').value,title:t,cat:$('#evCat').value,important:$('#evStar').checked});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};
+  openDrawer();}
+function openDrawer(){$('#scrim').classList.add('on');$('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');}
+function closeDrawer(){$('#scrim').classList.remove('on');$('#drawer').classList.remove('on');$('#drawer').setAttribute('aria-hidden','true');}
+$('#scrim').onclick=closeDrawer;$('#drawerClose').onclick=closeDrawer;
+$('#calPrev').onclick=()=>step(-1);$('#calNext').onclick=()=>step(1);$('#calToday').onclick=()=>{viewDate=new Date(today);renderCal();};
+function step(n){if(viewMode==='day')viewDate.setDate(viewDate.getDate()+n);else if(viewMode==='week')viewDate.setDate(viewDate.getDate()+7*n);else if(viewMode==='month')viewDate.setMonth(viewDate.getMonth()+n);else viewDate.setFullYear(viewDate.getFullYear()+n);viewDate=new Date(viewDate);renderCal();}
+$$('#v-cal .seg button').forEach(b=>b.onclick=()=>{viewMode=b.dataset.mode;renderCal();});
+
+/* ===== KITCHEN ===== */
+const RECIPES=[
+  {n:'Вівсянка з яйцем і ягодами',tag:'сніданок',prod:'Овес, молоко/вода, яйце, ягоди, горіхи, мед (тобі)',steps:['Овес залити окропом/молоком, накрити 5 хв.','Зварити яйце некруто.','Зверху ягоди й горіхи.'],note:'Йому — без меду, мінімум горіхів. Тобі — мед, жменя горіхів, фрукт.'},
+  {n:'Омлет з овочами',tag:'сніданок',prod:'Яйця, помідор, перець, зелень, трохи сиру',steps:['Овочі дрібно на сковороду.','Залити збитими яйцями.','Накрити, зелень зверху.'],note:'Йому — 2 яйця без хліба. Тобі — 2–3 яйця + скибка хліба.'},
+  {n:'Гречка з яйцем',tag:'сніданок',prod:'Гречка (з батчу), яйце, зелень',steps:['Розігріти гречку.','Зверху яйце.','Зелень, дрібка солі.'],note:'Найшвидше із заготовки. Тобі гречки — повна порція.'},
+  {n:'Запечена курка + гречка',tag:'обід',prod:'Куряче філе/стегна, гречка, спеції, олія',steps:['Курку посолити, спеції, олія — у форму.','200°C, 30–35 хв.','З гречкою й салатом.'],note:'Йому — гречки мало, овочів багато. Тобі — повна гречка.'},
+  {n:'Котлети з індички',tag:'обід',prod:'Фарш індички, цибуля, яйце, спеції',steps:['Фарш + терта цибуля + яйце + сіль.','Сформувати котлети.','Запекти 25 хв при 190°C.'],note:'Запечені, не смажені. Подвійна порція в батч.'},
+  {n:'Тушкована сочевиця з овочами',tag:'обід',prod:'Сочевиця/квасоля, морква, цибуля, помідор, олія',steps:['Овочі підсмажити 5 хв.','Сочевиця + вода, 20–25 хв.','Сіль, зелень.'],note:'Залізо + білок без м’яса. Тобі — більша порція.'},
+  {n:'Риба + картопля + салат',tag:'обід',prod:'Хек/скумбрія, картопля, овочі, олія, лимон',steps:['Рибу в форму, лимон, сіль — 200°C 20 хв.','Картоплю відварити/запекти.','Свіжий салат.'],note:'Рибу тобі — добре проготовану. Йому картоплі мало.'},
+  {n:'Овочевий/курячий суп',tag:'вечеря',prod:'Бульйон, морква, картопля, цибуля, зелень',steps:['Бульйон закип’ятити.','Овочі 20 хв.','Зелень.'],note:'Легка вечеря. Тобі можна додати яйце або крупу.'},
+  {n:'Запечена риба + овочі',tag:'вечеря',prod:'Риба, кабачок, перець, помідор, олія',steps:['Овочі й рибу в форму.','200°C 22–25 хв.','Зелень.'],note:'Легка вечеря, особливо йому.'},
+  {n:'Омлет з овочами на вечерю',tag:'вечеря',prod:'Яйця, шпинат/зелень, помідор',steps:['Зелень підв’ялити.','Залити яйцями.','З салатом.'],note:'Швидко, коли нема готового.'},
+  {n:'Батч: запечені білки',tag:'батч',prod:'Курка + котлети + яловичина',steps:['Курку й котлети — у духовку.','Яловичину відварити паралельно.','По контейнерах на 3–4 дні.'],note:'Неділя зі Спектром — і хоббі, і їжа на тиждень.'},
+  {n:'Батч: крупа + печені овочі',tag:'батч',prod:'Гречка/рис, кабачок, морква, перець, буряк',steps:['Велика каструля крупи.','Овочі — деко, 200°C 30 хв.','У контейнери.'],note:'Основа для швидких тарілок усю середину тижня.'}
+];
+function renderRecipes(f='all'){const items=RECIPES.filter(r=>f==='all'||r.tag===f);
+  $('#recipeList').innerHTML=items.map(r=>`<div class="recipe"><div class="rh"><span class="rname">${r.n}</span><span class="rtag">${r.tag}</span></div><div class="rdetail"><p class="prod"><b>Продукти:</b> ${r.prod}</p><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="note">⚖ ${r.note}</div></div></div>`).join('');
+  $('#recipeList').querySelectorAll('.recipe').forEach(c=>c.querySelector('.rh').onclick=()=>c.classList.toggle('open'));}
+$$('#recipeFilter .fb').forEach(b=>b.onclick=()=>{$$('#recipeFilter .fb').forEach(x=>x.setAttribute('aria-pressed',x===b));renderRecipes(b.dataset.f);});
+const SHOP_BASE={'Білок':['Яйця (×2 десятки)','Куряче філе/стегна','Фарш індички','Яловичина','Риба (хек/скумбрія)','Кисломолочний сир','Кефір/йогурт'],'Крупи й хліб':['Гречка','Овес','Рис','Хліб цільнозерновий','Сочевиця','Квасоля'],'Овочі':['Картопля','Морква','Цибуля','Капуста','Кабачки','Перець','Помідори','Огірки','Буряк','Зелень'],'Фрукти й інше':['Ягоди','Сезонні фрукти','Горіхи','Олія','Мед','Лимон']};
+async function renderShop(){const state=await store.get('shop',{});const custom=await store.get('shopCustom',[]);const cats={...SHOP_BASE};if(custom.length)cats['Моє']=custom;
+  $('#shopList').innerHTML=Object.entries(cats).map(([cat,items])=>`<div class="scat"><h4>${cat}</h4>${items.map(it=>{const id=cat+'·'+it;const isC=cat==='Моє';return `<label class="${state[id]?'done':''}" data-id="${id}"><input type="checkbox" ${state[id]?'checked':''}><span>${esc(it)}</span>${isC?`<button class="cdel" data-c="${esc(it)}">✕</button>`:''}</label>`;}).join('')}</div>`).join('');
+  $('#shopList').querySelectorAll('label').forEach(l=>{l.querySelector('input').onchange=async e=>{const s=await store.get('shop',{});s[l.dataset.id]=e.target.checked;await store.set('shop',s);l.classList.toggle('done',e.target.checked);};const del=l.querySelector('.cdel');if(del)del.onclick=async ev=>{ev.preventDefault();const c=(await store.get('shopCustom',[])).filter(x=>x!==del.dataset.c);await store.set('shopCustom',c);renderShop();};});}
+$('#addProdBtn').onclick=async()=>{const v=$('#addProd').value.trim();if(!v)return;const c=await store.get('shopCustom',[]);if(!c.includes(v))c.push(v);await store.set('shopCustom',c);$('#addProd').value='';renderShop();};
+$('#addProd').addEventListener('keydown',e=>{if(e.key==='Enter')$('#addProdBtn').click();});
+async function checkedShopText(){const state=await store.get('shop',{});const lines=[];Object.keys(state).forEach(id=>{if(state[id]){const name=id.split('·')[1]||id;lines.push('• '+name);}});return lines.length?('Закупівлі:\n'+lines.join('\n')):'';}
+$('#copyShop').onclick=async()=>{const txt=await checkedShopText();if(!txt)return showCopy('Нічого не позначено.');copyOrShow(txt);};
+$('#dlShop').onclick=async()=>{const txt=await checkedShopText();if(!txt)return;const b=new Blob([txt],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='zakupivli.txt';a.click();};
+$('#keepShop').onclick=()=>window.open('https://keep.google.com/','_blank');$('#shopReset').onclick=async()=>{await store.set('shop',{});renderShop();};
+function copyOrShow(text){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>showCopy(text,true)).catch(()=>showCopy(text));}else showCopy(text);}
+function showCopy(text,ok){$('#drawerTitle').textContent=ok?'Скопійовано ✓':'Скопіюй вручну';$('#drawerSub').textContent='Встав у Google Keep або нотатки';$('#drawerBody').innerHTML=`<textarea class="copybox" id="cbx">${esc(text)}</textarea><button class="btn" id="cbtn" style="width:100%;margin-top:10px">Виділити все</button><button class="btn ghost" id="kbtn" style="width:100%;margin-top:8px">Відкрити Google Keep</button>`;$('#cbtn').onclick=()=>{const t=$('#cbx');t.select();t.setSelectionRange(0,99999);try{document.execCommand('copy');}catch(e){}};$('#kbtn').onclick=()=>window.open('https://keep.google.com/','_blank');openDrawer();}
+
+/* ===== BOOKS ===== */
+const BCATS=['Розвиток','Менеджмент','Батьківство і пологи','Виховання','Стосунки','Світогляд і бестселери'];
+const DEFAULT_BOOKS=[
+  {id:'b1',t:'Атомні звички',a:'Джеймс Клір',cat:'Розвиток',why:'Під перебудову графіку',desc:'Як крихітні щоденні дії складаються у великі зміни — і як будувати системи, а не покладатися на силу волі.'},
+  {id:'b2',t:'Мислення швидке й повільне',a:'Деніел Канеман',cat:'Розвиток',why:'Як ми приймаємо рішення',desc:'Дві системи мислення — швидка інтуїтивна й повільна аналітична — і типові пастки.'},
+  {id:'b3',t:'Людина в пошуках справжнього сенсу',a:'Віктор Франкл',cat:'Розвиток',why:'Опора у важкі періоди',desc:'Психолог, що пережив концтабір, про те, як сенс тримає людину навіть у найтемніші часи.'},
+  {id:'b4',t:'Чому ми спимо',a:'Метью Вокер',cat:'Розвиток',why:'Про твій найслабший ресурс',desc:'Наука сну: чому він критичний для тіла й мозку і що буває, коли його бракує.'},
+  {id:'b5',t:'Глибока робота',a:'Кел Ньюпорт',cat:'Розвиток',why:'Фокус для Supplax і ШІ',desc:'Як працювати сфокусовано у світі відволікань — рідкісна й цінна навичка.'},
+  {id:'b6',t:'Тіло веде лік',a:'Бессел ван дер Колк',cat:'Розвиток',why:'Тіло, стрес, відновлення',desc:'Як травма й стрес живуть у тілі та які шляхи відновлення працюють.'},
+  {id:'b26',t:'Range',a:'Девід Епштейн',cat:'Розвиток',why:'Для тих, хто багато вміє',desc:'Чому універсали з широким досвідом часто випереджають вузьких спеціалістів.'},
+  {id:'b27',t:'Mindset',a:'Керол Двек',cat:'Розвиток',why:'Про ставлення до зростання',desc:'Різниця між «фіксованим» і «зростаючим» мисленням і як це впливає на життя.'},
+  {id:'b7',t:'Найважче в управлінні',a:'Бен Горовіц',cat:'Менеджмент',why:'Чесно про складні рішення',desc:'Без прикрас про найтяжчі рішення керівника, коли простих відповідей немає.'},
+  {id:'b8',t:'Extreme Ownership',a:'Джоко Віллінк, Лейф Бабін',cat:'Менеджмент',why:'Лідерство з військового досвіду',desc:'Принципи лідерства морських котиків, перенесені в управління командами.'},
+  {id:'b9',t:'Радикальна відвертість',a:'Кім Скотт',cat:'Менеджмент',why:'Фідбек без руйнування стосунків',desc:'Як водночас піклуватися про людей і прямо казати правду.'},
+  {id:'b10',t:'Починай із «Чому»',a:'Саймон Сінек',cat:'Менеджмент',why:'Сенс і мотивація команди',desc:'Чому великі лідери й бренди починають із мети, а не з продукту.'},
+  {id:'b11',t:'Вимірюй найважливіше',a:'Джон Дорр',cat:'Менеджмент',why:'OKR — і для життя',desc:'Система цілей OKR, що допомагає фокусувати зусилля на головному.'},
+  {id:'b28',t:'The Coaching Habit',a:'Майкл Бенґей Стеньєр',cat:'Менеджмент',why:'Сім питань, що змінюють розмови',desc:'Як менше радити й більше питати, щоб люди самі знаходили рішення.'},
+  {id:'b12',t:'Expecting Better',a:'Емілі Остер',cat:'Батьківство і пологи',why:'Доказова вагітність без міфів',desc:'Економістка розбирає, що насправді кажуть дані про вагітність, а що — міф.'},
+  {id:'b13',t:'Cribsheet',a:'Емілі Остер',cat:'Батьківство і пологи',why:'Рішення першого року на даних',desc:'Доказовий погляд на сон, годування й рішення першого року, без тиску.'},
+  {id:'b29',t:'The First Forty Days',a:'Хен Оу',cat:'Батьківство і пологи',why:'Відновлення після пологів',desc:'Догляд за матір’ю в перші тижні після народження — їжа, відпочинок, підтримка.'},
+  {id:'b14',t:'Дитина з характером',a:'Деніел Сіґел',cat:'Виховання',why:'Як працює мозок дитини',desc:'12 стратегій з урахуванням розвитку дитячого мозку для спокійніших стосунків.'},
+  {id:'b15',t:'Як говорити, щоб діти слухали',a:'А. Фабер, Е. Мазліш',cat:'Виховання',why:'Класика комунікації з дитиною',desc:'Практичні навички розмови з дитиною — менше боротьби, більше співпраці.'},
+  {id:'b16',t:'Дитина-Монтессорі',a:'Сімона Девіс',cat:'Виховання',why:'Спокійний підхід для малюків',desc:'Як облаштувати дім і день, щоб малюк зростав самостійним і спокійним.'},
+  {id:'b17',t:'Полюй, збирай, виховуй',a:'Мікелін Дуклефф',cat:'Виховання',why:'Виховання без криків',desc:'Уроки виховання з культур, де діти спокійні й самостійні без покарань.'},
+  {id:'b31',t:'No-Drama Discipline',a:'Сіґел, Брайсон',cat:'Виховання',why:'Дисципліна без сварок',desc:'Як ставити межі й вчити дитину, не руйнуючи зв’язок.'},
+  {id:'b18',t:'Сім принципів щасливого шлюбу',a:'Джон Ґоттман',cat:'Стосунки',why:'Що тримає пару — доказово',desc:'Дослідник пар на основі десятиліть спостережень — що відрізняє міцні стосунки.'},
+  {id:'b19',t:'Прив’язаність (Attached)',a:'Левін, Геллер',cat:'Стосунки',why:'Стилі прив’язаності',desc:'Три стилі прив’язаності й те, як вони визначають поведінку в стосунках.'},
+  {id:'b20',t:'Обійми мене міцно',a:'Сью Джонсон',cat:'Стосунки',why:'Емоційний зв’язок у парі',desc:'Сім розмов, що відновлюють близькість і безпеку між партнерами.'},
+  {id:'b21',t:'Ненасильницьке спілкування',a:'Маршалл Розенберг',cat:'Стосунки',why:'Говорити про важке без конфлікту',desc:'Метод спілкування, що перетворює конфлікти на порозуміння.'},
+  {id:'b32',t:'Mating in Captivity',a:'Естер Перель',cat:'Стосунки',why:'Близькість і пристрасть надовго',desc:'Як зберегти бажання й живість у стабільних стосунках.'},
+  {id:'b22',t:'Sapiens. Людина розумна',a:'Ювал Ной Харарі',cat:'Світогляд і бестселери',why:'Велика картина історії',desc:'Як Homo sapiens пройшов шлях від однієї з тварин до володаря планети.'},
+  {id:'b23',t:'Фактологія',a:'Ганс Рослінг',cat:'Світогляд і бестселери',why:'Світ кращий, ніж здається',desc:'Чому ми хибно бачимо світ гіршим, ніж він є, і як думати на фактах.'},
+  {id:'b24',t:'Тиша. Сила інтровертів',a:'Сьюзан Кейн',cat:'Світогляд і бестселери',why:'Різні способи бути сильним',desc:'Цінність інтровертів у світі, що переоцінює гучність.'},
+  {id:'b25',t:'Educated. Освічена',a:'Тара Вестовер',cat:'Світогляд і бестселери',why:'Сила освіти й волі',desc:'Мемуар про шлях від ізольованого дитинства до Кембриджа через освіту.'},
+  {id:'b33',t:'Outliers. Генії й аутсайдери',a:'Малколм Ґладвелл',cat:'Світогляд і бестселери',why:'Що стоїть за успіхом',desc:'Чому успіх — не лише талант, а час, місце й тисячі годин практики.'},
+  {id:'b34',t:'Чорний лебідь',a:'Нассім Талеб',cat:'Світогляд і бестселери',why:'Про випадковість і ризик',desc:'Як рідкісні непередбачувані події формують світ — і чому ми їх недооцінюємо.'}
+];
+let bookFilter='all';
+async function getBooks(){return await store.get('books',DEFAULT_BOOKS);}
+async function getBookState(){return await store.get('bookState',{});}
+async function renderBooks(){const books=await getBooks();const st=await getBookState();
+  $('#nbCat').innerHTML=BCATS.map(c=>`<option>${c}</option>`).join('');
+  $('#bookFilter').innerHTML=[['all','Усі'],['now','Читаю/Слухаю'],['done','Прочитано'],...BCATS.map(c=>[c,c])].map(([f,l])=>`<button class="fb" data-f="${f}" aria-pressed="${bookFilter===f}">${l}</button>`).join('');
+  $('#bookFilter').querySelectorAll('.fb').forEach(b=>b.onclick=()=>{bookFilter=b.dataset.f;renderBooks();});
+  const items=books.filter(b=>{const s=st[b.id]||{status:'plan'};if(bookFilter==='all')return true;if(bookFilter==='now')return s.status==='now';if(bookFilter==='done')return s.status==='done';return b.cat===bookFilter;});
+  const STNAME={plan:'У черзі',now:'Читаю',done:'Прочитано'};
+  $('#bookList').innerHTML=items.map(b=>{const s=st[b.id]||{};const status=s.status||'plan';const fmt=s.fmt||'paper';const stLabel=status==='now'?(fmt==='audio'?'Слухаю':'Читаю'):STNAME[status];
+    return `<div class="book ${s.open?'open':''}" data-id="${b.id}"><div class="brow"><div class="bmain"><div class="bt">${esc(b.t)}<span class="caret">▾</span></div><div class="ba">${esc(b.a||'')}</div>${b.why?`<div class="bwhy">${esc(b.why)}</div>`:''}<span class="bcat">${b.cat}</span></div>
+      <div class="bctl"><button class="st ${status}" data-act="status">${stLabel}</button><button class="fmt" data-act="fmt">${fmt==='audio'?'🎧 Аудіо':'📖 Папір'}</button><button class="bx" data-act="del">✕</button></div></div>
+      <div class="bdetail">${b.desc?`<p class="bdesc">${esc(b.desc)}</p>`:''}${b.link?`<a class="blink" href="${esc(b.link)}" target="_blank" rel="noopener">Посилання ↗</a>`:''}<div class="bnlabel">Мої нотатки / самарі</div><textarea class="bnotes" data-act="notes" placeholder="Думки, цитати, висновки…">${esc(s.notes||'')}</textarea></div></div>`;}).join('')||'<p class="note-soft">Нічого в цьому фільтрі.</p>';
+  $('#bookList').querySelectorAll('.book').forEach(el=>{const id=el.dataset.id;
+    el.querySelector('.bmain').onclick=async()=>{const s=await getBookState();s[id]={...(s[id]||{}),open:!(s[id]||{}).open};await store.set('bookState',s);el.classList.toggle('open');};
+    el.querySelector('[data-act="status"]').onclick=async e=>{e.stopPropagation();const s=await getBookState();const cur=(s[id]||{}).status||'plan';const nx={plan:'now',now:'done',done:'plan'}[cur];s[id]={...(s[id]||{}),status:nx};await store.set('bookState',s);renderBooks();};
+    el.querySelector('[data-act="fmt"]').onclick=async e=>{e.stopPropagation();const s=await getBookState();const cur=(s[id]||{}).fmt||'paper';s[id]={...(s[id]||{}),fmt:cur==='paper'?'audio':'paper'};await store.set('bookState',s);renderBooks();};
+    el.querySelector('[data-act="del"]').onclick=async e=>{e.stopPropagation();const bs=(await getBooks()).filter(x=>x.id!==id);await store.set('books',bs);renderBooks();};
+    const nt=el.querySelector('[data-act="notes"]');nt.onclick=e=>e.stopPropagation();nt.onchange=async()=>{const s=await getBookState();s[id]={...(s[id]||{}),notes:nt.value};await store.set('bookState',s);};});}
+$('#nbAdd').onclick=async()=>{const t=$('#nbTitle').value.trim();if(!t)return $('#nbTitle').focus();const bs=await getBooks();bs.unshift({id:uid(),t,a:$('#nbAuthor').value.trim(),cat:$('#nbCat').value,why:'',desc:''});await store.set('books',bs);$('#nbTitle').value='';$('#nbAuthor').value='';renderBooks();};
+
+/* ===== WEEKEND ===== */
+const IDEAS=[
+  {h:'Кіно вдома — затишне',badge:'диван',list:['«Амелі», «Тосканське сонце»','Добрі драми без надриву','М’який ромком на вечір']},
+  {h:'Кіно вдома — детектив/трилер',badge:'інтрига',list:['«Сім», «Початок», «Острів проклятих»','Скандинавські детективи','Серіал-розслідування']},
+  {h:'Кіно вдома — українське',badge:'наше',list:['«Мої думки тихі», «Памфір», «Стоп-Земля»','Документалка про цікаве вам']},
+  {h:'Кіно вдома — комедія',badge:'легко',list:['Класика, яку давно не бачили','Стендап-спешл під вечерю']},
+  {h:'Документалки про природу/космос',badge:'споглядання',list:['Серії про планету, океан, всесвіт','Гарна картинка + спокій']},
+  {h:'Серіал-марафон',badge:'надовго',list:['Один сезон за вихідні','Обрати разом — ритуал']},
+  {h:'Настільні ігри',badge:'удвох',list:['Carcassonne, Splendor, 7 Wonders Duel','Шахи / нарди','Карти']},
+  {h:'Стратегічний вечір',badge:'для голови',list:['Каркасон/Каттан на двох','Покрокова гра з рахунком']},
+  {h:'Готувати разом нове',badge:'хоббі-кандидат',list:['Обрати кухню (грузинська, італійська)','Хінкалі / піца з нуля','Це і #2, і #3 одночасно']},
+  {h:'Пекти разом',badge:'смачно',list:['Хліб на заквасці','Сирники, печиво','Дім пахне — атмосфера']},
+  {h:'Сліпа дегустація',badge:'гра-смак',list:['Вгадати продукти/спеції із зав’язаними очима','Весело й несподівано']},
+  {h:'Пазли / збірні моделі',badge:'спокій',list:['Пазл 1000+','Збірна модель техніки']},
+  {h:'Малювання-антистрес',badge:'руками',list:['Розмальовки, акварель, скетч','Не треба вміти — треба процес']},
+  {h:'Більярд / боулінг',badge:'у місті',list:['У приміщенні, азартно','Без довгих переходів']},
+  {h:'Тир',badge:'вам по темі',list:['Пневматика або стрілецький тир','Знайома стихія + змагання']},
+  {h:'Квест-кімната',badge:'поки можна',list:['Спокійні кімнати','Командна робота']},
+  {h:'Караоке вдома',badge:'голосисто',list:['Плейлист улюблених','Сміх гарантований']},
+  {h:'Кав’ярня + настілки',badge:'вихід у світ',list:['Антикафе з іграми','Десерт + партія']},
+  {h:'Майстерклас руками',badge:'нове разом',list:['Гончарство, свічки, шкіра','Привезете щось своє']},
+  {h:'Спа-вечір удома',badge:'релакс',list:['Маски, масаж стоп, свічки','Вода тепла, не гаряча — через вагітність']},
+  {h:'Планувати майбутню подорож',badge:'мрії',list:['Куди поїдете втрьох за рік','Дошка бажань, маршрути']},
+  {h:'Вечір історій / питань',badge:'ближче',list:['Глибокі питання одне одному','Згадати, як починали']},
+  {h:'Капсула для малюка',badge:'разом про головне',list:['Лист майбутній дитині','Скласти список імен, мрій']},
+  {h:'Музичний вечір',badge:'звук',list:['Зібрати спільний плейлист','Показати одне одному улюблене']}
+];
+function renderIdeas(){$('#ideaGrid').innerHTML=IDEAS.map(i=>`<div class="idea"><div class="ih">${i.h}</div><ul>${i.list.map(x=>`<li>${x}</li>`).join('')}</ul><span class="badge">${i.badge}</span></div>`).join('');}
+$('#rBtn').onclick=()=>{let n=0;const t=setInterval(()=>{const i=IDEAS[Math.floor(Math.random()*IDEAS.length)];$('#rPick').textContent=i.h;$('#rWhy').textContent=i.list[0];if(++n>10)clearInterval(t);},70);};
+
+/* ===== ACTIVITY ===== */
+const ACTIVITY=[
+  {id:'run',name:'Біг',icon:'🏃',note:'За самопочуттям, у «розмовному» темпі. У 3 триместрі багато хто переходить на швидку ходьбу — це нормально. Пий воду, не перегрівайся.',items:[
+    {t:'Легкий біг підтюпцем 20–30 хв',d:'Розмовний темп, рівна поверхня'},
+    {t:'Інтервали ходьба/біг',d:'2 хв ходьби — 1 хв легкого бігу, 6–8 кіл'},
+    {t:'Біг на місці / висока ходьба',d:'5–10 хв, як розминка вдома'},
+    {t:'Бігова доріжка з нахилом',d:'Швидка ходьба під кутом замість бігу'}]},
+  {id:'walk',name:'Прогулянки',icon:'🚶',note:'Найбезпечніше й щодня корисне. Прогулянка після їжі тримає цукор крові рівним.',items:[
+    {t:'Швидка ходьба 40–60 хв',d:'Основне аеробне навантаження'},
+    {t:'Прогулянка після їжі 15 хв',d:'×2–3 на день, для рівного цукру'},
+    {t:'Ходьба сходами',d:'Кілька прольотів, за диханням'},
+    {t:'Скандинавська ходьба',d:'З палицями — менше навантаження на спину'}]},
+  {id:'bike',name:'Велосипед',icon:'🚲',note:'На пізніх термінах краще велотренажер: баланс змінюється, менше ризику падіння.',items:[
+    {t:'Велотренажер 20–30 хв',d:'Спокійний опір, рівне дихання'},
+    {t:'Сайкл-розминка 10 хв',d:'Перед силовою як розігрів'},
+    {t:'Спокійна їзда рівним',d:'Тільки безпечний маршрут, без перепадів'}]},
+  {id:'gym',name:'Зал',icon:'🏋️',note:'Тренажери з опорою стабільніші за вільні ваги. Уникай положення лежачи на спині надовго, максимальних ваг і затримки дихання.',items:[
+    {t:'Жим ногами (легко-помірно)',d:'Тренажер, повний контроль, без «до відмови»'},
+    {t:'Тяга верхнього блоку',d:'Спина, сидячи з опорою'},
+    {t:'Горизонтальна тяга блоку',d:'Постава, лопатки'},
+    {t:'Відведення/зведення стегон',d:'Тренажер на сідниці й привідні'},
+    {t:'Гіперекстензія (легко)',d:'Розгиначі спини, малий діапазон'},
+    {t:'Орбітрек / еліпс 15–20 хв',d:'Аеробне без удару'},
+    {t:'Гребний тренажер (легко)',d:'Спина пряма, помірний темп'},
+    {t:'Румунська тяга з легкою вагою',d:'Сідниці/біцепс стегна, спина нейтральна'},
+    {t:'Жим гантелей сидячи з опорою',d:'Плечі, спинка лавки вертикально'},
+    {t:'Сідничний місток',d:'З опорою лопаток на лаву, без затримки дихання'}]},
+  {id:'body',name:'З власною вагою',icon:'💪',note:'За мотивами darebee.com (мають пренатальні програми). Уникай вправ лежачи на животі та довго на спині; планку можна на руках/боці.',items:[
+    {t:'Присідання (air squats)',d:'2–3×10–15, п’яти на підлозі'},
+    {t:'Випади на місці',d:'2–3×8 на ногу, тримайся за опору'},
+    {t:'Сідничний місток',d:'2–3×12, стискати сідниці зверху'},
+    {t:'Віджимання від стіни / похилі',d:'2–3×10, замість підлоги'},
+    {t:'Бічна планка',d:'15–30 с на бік, замість планки на животі'},
+    {t:'Планка на руках/передпліччях',d:'15–30 с, спина нейтральна'},
+    {t:'Птах-собака (bird-dog)',d:'2×8 на бік, баланс і кор'},
+    {t:'Кішка-корова',d:'8–10 циклів, м’яко для спини'},
+    {t:'Підйоми на носки',d:'2×15, литки й кровообіг'},
+    {t:'Відведення ноги стоячи',d:'2×12 на ногу, біля опори'}]},
+  {id:'mobility',name:'Мобільність',icon:'🧘',note:'М’яко, без болю. Працює на поставу, таз і підготовку до пологів.',items:[
+    {t:'Нахили таза (pelvic tilts)',d:'10–12, стоячи або рачки'},
+    {t:'Розкриття грудного відділу',d:'Біля стіни / у дверях, по 30 с'},
+    {t:'Розтяжка стегон («голуб» з опорою)',d:'30–45 с на бік, м’яко'},
+    {t:'Дихання діафрагмою + тазове дно',d:'5 хв, вдих — розслабити, видих — м’яко підтягнути'},
+    {t:'М’яка йога для вагітних',d:'10–15 хв за відео для свого триместру'},
+    {t:'Розтяжка литок і стоп',d:'Проти набряків і судом'}]}
+];
+let actFilter='walk';
+const actTrayItems=[];
+function renderActivity(){
+  $('#actFilter').innerHTML=ACTIVITY.map(c=>`<button class="fb" data-f="${c.id}" aria-pressed="${actFilter===c.id}">${c.icon} ${c.name}</button>`).join('');
+  $('#actFilter').querySelectorAll('.fb').forEach(b=>b.onclick=()=>{actFilter=b.dataset.f;renderActivity();});
+  const c=ACTIVITY.find(x=>x.id===actFilter)||ACTIVITY[0];
+  $('#actList').innerHTML=`<div class="actcat"><div class="acthd">${c.icon} ${c.name}</div><div class="actnote">${esc(c.note)}</div>`+
+    c.items.map((it,i)=>`<div class="actitem"><div class="ai-main"><div class="ai-t">${esc(it.t)}</div><div class="ai-d">${esc(it.d)}</div></div><button class="ai-add" data-i="${i}" title="Додати у тренування">＋</button></div>`).join('')+`</div>`;
+  $('#actList').querySelectorAll('.ai-add').forEach(b=>b.onclick=()=>{const it=c.items[+b.dataset.i];actTrayItems.push({t:it.t,cat:c.name});renderActTray();});
+  renderActTray();
+}
+function renderActTray(){const tray=$('#actTray');
+  if(!actTrayItems.length){tray.className='acttray card empty';tray.innerHTML='';return;}
+  tray.className='acttray card';
+  tray.innerHTML=`<h3>Сьогоднішнє тренування</h3>
+    <div>${actTrayItems.map((it,i)=>`<span class="trchip">${esc(it.t)}<button data-rm="${i}">✕</button></span>`).join('')}</div>
+    <div class="trbar">
+      <label style="font-size:12px;color:var(--muted)">Час:</label>
+      <input type="time" id="actTime" value="07:00"><input type="time" id="actEnd" value="07:45">
+      <button class="btn sm" id="actAddDay">➕ У план дня</button>
+      <button class="btn amber sm" id="actCopy">Скопіювати</button>
+      <button class="btn ghost sm" id="actClear">Очистити</button>
+    </div>
+    <p class="note-soft" id="actMsg" style="margin-top:8px"></p>`;
+  tray.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{actTrayItems.splice(+b.dataset.rm,1);renderActTray();});
+  $('#actClear').onclick=()=>{actTrayItems.length=0;renderActTray();};
+  $('#actCopy').onclick=async()=>{const txt='Тренування — '+`${today.getDate()} ${MON[today.getMonth()]}\n`+actTrayItems.map(it=>'• '+it.t).join('\n');
+    try{await navigator.clipboard.writeText(txt);$('#actMsg').textContent='Скопійовано в буфер ✓';}catch(e){$('#actMsg').textContent='Не вдалось скопіювати — виділи вручну: '+txt;}};
+  $('#actAddDay').onclick=async()=>{const dk=key(today);const d=await getDay(dk);d.add=d.add||[];const title='Тренування: '+actTrayItems.map(it=>it.t).join(', ');
+    d.add.push({id:uid(),title:title.slice(0,120),prio:'move',start:$('#actTime').value,end:$('#actEnd').value,notes:actTrayItems.map(it=>it.t).join(' · ')});await saveDay(dk,{add:d.add});
+    $('#actMsg').textContent='Додано в план на сьогодні ✓';afterPlan();};
+}
+
+/* ===== AFFAIRS ===== */
+const DEFAULT_AFFAIRS={
+  perinatal:{title:'Перинатальний центр і декрет',sub:'Лікар: Шумський Юрій Ігорович (обласний ПЦ)',fixed:true,items:[
+    {id:'pa1',t:'Стати на облік',done:true},
+    {id:'pa2',t:'Здати аналізи + отримати документ на декрет',done:false,due:'2026-07-04'},
+    {id:'pa3',t:'Записатися на курси батьківства у Перинатальному',done:false},
+    {id:'pa4',t:'Знайти курси батьківства у місті',done:false}]},
+  docs:{title:'Зміна прізвища — документи',sub:'Паспорти подано в ЦНАП, чекаю',fixed:true,items:[
+    {id:'d1',t:'Отримати нові паспорти (ID + закордонний)',done:false},
+    {id:'d2',t:'Змінити прізвище в усіх банках',done:false},
+    {id:'d3',t:'Змінити прізвище в установах/сервісах',done:false},
+    {id:'d4',t:'Замінити військовий квиток',done:false},
+    {id:'d5',t:'Замінити посвідчення УБД',done:false},
+    {id:'d6',t:'Замінити водійські права',done:false}]},
+  stages:{title:'Етапи до пологів',sub:'Орієнтовно — лікар коригує',fixed:true,items:[
+    {id:'s1',t:'Курс підготовки до пологів (зі Спектром)',done:false},
+    {id:'s2',t:'Скласти список у пологову сумку',done:false},
+    {id:'s3',t:'Зібрати сумку фізично (33–36 тиж)',done:false},
+    {id:'s4',t:'Дитячі покупки — базовий мінімум',done:false},
+    {id:'s5',t:'Заморозити страви «на перші дні»',done:false},
+    {id:'s6',t:'Маршрут і зв’язок із пологовим — перевірені',done:false}]}
+};
+async function renderAffairs(){const a=await getAffairs();
+  $('#affairsBody').innerHTML=Object.entries(a).map(([sid,sec])=>`<div class="aff" data-sec="${sid}">
+    <div class="ahd"><div><h3>${esc(sec.title)}</h3>${sec.sub?`<div class="asub">${esc(sec.sub)}</div>`:''}</div>${sec.fixed?'':`<button class="secdel" title="Видалити чек-лист">🗑</button>`}</div>
+    ${sec.items.map((it,i)=>`<div class="arow ${it.done?'done':''}" data-id="${it.id}" draggable="true">
+      <span class="amove"><button data-mv="up" ${i===0?'style="visibility:hidden"':''}>▲</button><button data-mv="down" ${i===sec.items.length-1?'style="visibility:hidden"':''}>▼</button></span>
+      <span class="abox">${it.done?'✓':''}</span><span class="at">${esc(it.t)}</span>
+      <span class="atime"><input type="time" data-st value="${it.start||''}" title="від"><input type="time" data-en value="${it.end||''}" title="до"></span>
+      <input type="date" class="adate" value="${it.due||''}"><button class="ax">✕</button></div>`).join('')}
+    <div class="addmini"><input type="text" class="fld" placeholder="Новий пункт…" data-add="${sid}"><input type="time" class="adate" data-addstart="${sid}" title="від" style="width:84px"><input type="time" class="adate" data-addend="${sid}" title="до" style="width:84px"><input type="date" class="adate" data-adddate="${sid}"><button class="btn sm" data-addbtn="${sid}">+ Додати</button></div></div>`).join('')||'<p class="note-soft">Чек-листів ще немає. Створи перший вище.</p>';
+  $('#affairsBody').querySelectorAll('.aff').forEach(box=>{const sid=box.dataset.sec;
+    box.querySelectorAll('.arow').forEach(r=>{const id=r.dataset.id;
+      r.querySelector('.abox').onclick=async()=>{const a2=await getAffairs();const it=a2[sid].items.find(x=>x.id===id);it.done=!it.done;await setAffairs(a2);renderAffairs();renderCal();renderToday();fillNextPill();};
+      r.querySelector('.ax').onclick=async()=>{const a2=await getAffairs();a2[sid].items=a2[sid].items.filter(x=>x.id!==id);await setAffairs(a2);renderAffairs();renderCal();renderToday();fillNextPill();};
+      r.querySelector('.adate').onchange=async e=>{const a2=await getAffairs();const it=a2[sid].items.find(x=>x.id===id);it.due=e.target.value;await setAffairs(a2);renderCal();renderToday();renderUpnext();fillNextPill();};
+      r.querySelector('[data-st]').onchange=async e=>{const a2=await getAffairs();const it=a2[sid].items.find(x=>x.id===id);it.start=e.target.value;await setAffairs(a2);renderCal();renderToday();};
+      r.querySelector('[data-en]').onchange=async e=>{const a2=await getAffairs();const it=a2[sid].items.find(x=>x.id===id);it.end=e.target.value;await setAffairs(a2);renderCal();renderToday();};
+      r.querySelector('[data-mv="up"]').onclick=()=>moveAffair(sid,id,-1);
+      r.querySelector('[data-mv="down"]').onclick=()=>moveAffair(sid,id,1);});
+    bindAffairDrag(box,sid);
+    const sd=box.querySelector('.secdel');if(sd)sd.onclick=async()=>{const a2=await getAffairs();delete a2[sid];await setAffairs(a2);renderAffairs();renderCal();};
+    const inp=box.querySelector(`[data-add="${sid}"]`),dt=box.querySelector(`[data-adddate="${sid}"]`),sStart=box.querySelector(`[data-addstart="${sid}"]`),sEnd=box.querySelector(`[data-addend="${sid}"]`);
+    const add=async()=>{const v=inp.value.trim();if(!v)return;const a2=await getAffairs();a2[sid].items.push({id:uid(),t:v,done:false,due:dt.value||'',start:sStart.value||'',end:sEnd.value||''});await setAffairs(a2);renderAffairs();renderCal();renderToday();fillNextPill();};
+    box.querySelector(`[data-addbtn="${sid}"]`).onclick=add;inp.addEventListener('keydown',e=>{if(e.key==='Enter')add();});});}
+async function moveAffair(sid,id,dir){const a=await getAffairs();const arr=a[sid].items;const i=arr.findIndex(x=>x.id===id);const j=i+dir;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];await setAffairs(a);renderAffairs();}
+function bindAffairDrag(box,sid){let dragId=null;
+  box.querySelectorAll('.arow').forEach(r=>{
+    r.addEventListener('dragstart',e=>{dragId=r.dataset.id;r.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    r.addEventListener('dragend',()=>{dragId=null;r.classList.remove('dragging');});
+    r.addEventListener('dragover',e=>{e.preventDefault();});
+    r.addEventListener('drop',async e=>{e.preventDefault();const overId=r.dataset.id;if(!dragId||dragId===overId)return;
+      const a=await getAffairs();const arr=a[sid].items;const from=arr.findIndex(x=>x.id===dragId),to=arr.findIndex(x=>x.id===overId);if(from<0||to<0)return;const[m]=arr.splice(from,1);arr.splice(to,0,m);await setAffairs(a);renderAffairs();});
+  });}
+$('#newClBtn').onclick=async()=>{const v=$('#newClTitle').value.trim();if(!v)return $('#newClTitle').focus();const a=await getAffairs();a['cl_'+uid()]={title:v,sub:'',items:[]};await setAffairs(a);$('#newClTitle').value='';renderAffairs();};
+$('#newClTitle').addEventListener('keydown',e=>{if(e.key==='Enter')$('#newClBtn').click();});
+
+/* ===== editable tabs ===== */
+const DEFAULT_TABS=[{id:'today',label:'Сьогодні'},{id:'prio',label:'Пріоритети'},{id:'cal',label:'Календар'},{id:'activity',label:'Активність'},{id:'kitchen',label:'Кухня'},{id:'books',label:'Книги'},{id:'weekend',label:'Вихідні'},{id:'affairs',label:'Справи · документи'}];
+let activeView='today';
+async function getTabs(){let t=await store.get('tabs',null);if(!t)return DEFAULT_TABS.slice();
+  const ids=new Set(t.map(x=>x.id));DEFAULT_TABS.forEach(d=>{if(!ids.has(d.id))t.push({...d});});return t.filter(x=>DEFAULT_TABS.some(d=>d.id===x.id));}
+async function renderTabs(){const tabs=await getTabs();
+  $('#tabs').innerHTML=tabs.map(t=>`<button class="tab" role="tab" data-v="${t.id}" aria-selected="${t.id===activeView}">${esc(t.label)}</button>`).join('')+`<button class="tab tabedit" id="tabEditBtn" title="Редагувати вкладки">✎ вкладки</button>`;
+  $('#tabEditBtn').onclick=openTabsEditor;}
+async function selectView(v){activeView=v;$$('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.v===v));$$('.view').forEach(s=>s.classList.remove('on'));const sec=$('#v-'+v);if(sec)sec.classList.add('on');
+  if(v==='cal')renderCal();if(v==='prio'){renderPrioCards();renderTasks();}if(v==='today')renderToday();if(v==='affairs')renderAffairs();if(v==='activity')renderActivity();}
+$('#tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b||b.id==='tabEditBtn')return;selectView(b.dataset.v);};
+async function openTabsEditor(){const tabs=await getTabs();
+  $('#drawerTitle').textContent='Вкладки';$('#drawerSub').textContent='Перейменуй або зміни порядок';
+  $('#drawerBody').innerHTML=tabs.map((t,i)=>`<div class="tabedit-row" data-id="${t.id}"><input value="${esc(t.label)}" data-lbl><button data-act="up" ${i===0?'style="visibility:hidden"':''}>↑</button><button data-act="down" ${i===tabs.length-1?'style="visibility:hidden"':''}>↓</button></div>`).join('')+`<button class="btn" id="tabsSave" style="width:100%;margin-top:12px">Зберегти</button><button class="btn ghost" id="tabsReset" style="width:100%;margin-top:8px">Скинути до типових</button>`;
+  const collect=()=>[...$('#drawerBody').querySelectorAll('.tabedit-row')].map(r=>({id:r.dataset.id,label:r.querySelector('[data-lbl]').value.trim()||r.dataset.id}));
+  $('#drawerBody').querySelectorAll('[data-act="up"]').forEach(b=>b.onclick=async()=>{const cur=collect();const row=b.closest('.tabedit-row');const i=[...row.parentNode.children].indexOf(row);if(i<=0)return;[cur[i-1],cur[i]]=[cur[i],cur[i-1]];await store.set('tabs',cur);openTabsEditor();});
+  $('#drawerBody').querySelectorAll('[data-act="down"]').forEach(b=>b.onclick=async()=>{const cur=collect();const row=b.closest('.tabedit-row');const i=[...row.parentNode.children].indexOf(row);if(i>=cur.length-1)return;[cur[i+1],cur[i]]=[cur[i],cur[i+1]];await store.set('tabs',cur);openTabsEditor();});
+  $('#tabsSave').onclick=async()=>{await store.set('tabs',collect());await renderTabs();closeDrawer();};
+  $('#tabsReset').onclick=async()=>{await store.set('tabs',DEFAULT_TABS.slice());await renderTabs();closeDrawer();};
+  openDrawer();}
+
+/* ===== init ===== */
+(async function(){await loadState();renderDawn();await renderTabs();await seedOnce();await renderToday();await renderPrioCards();await renderTasks();renderRecipes();await renderShop();await renderBooks();renderIdeas();renderActivity();await renderAffairs();await renderCal();})();
+</script>
+</body>
+</html>
