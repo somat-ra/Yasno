@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --mist:#ECEFEA;--mist2:#E3E7E0;--spruce:#1F3A34;--spruce2:#2E6E5A;--slate:#3E6B7A;
@@ -370,6 +371,8 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
     <div class="brandrow">
       <div class="brand"><h1>Ясно</h1><span class="sub">персональний дашборд</span></div>
       <div class="todaycard" id="todayCard"></div>
+      <button id="syncBtn" title="Синхронізація з Google Drive" hidden
+        style="margin-left:auto;align-self:flex-start;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 14px;font:600 13px/1 Inter,sans-serif;cursor:pointer;white-space:nowrap">☁︎ Синхронізація</button>
     </div>
     <div class="dawn" id="dawn"></div>
   </div>
@@ -607,11 +610,100 @@ let _saveTimer=null;
 async function saveState(){
   state.updatedAt=Date.now();
   await backend.set('updatedAt',state.updatedAt);
-  const snapshot=JSON.stringify(state); // те, що піде у yasno-state.json
-  // TODO(sync, Google Drive): записати snapshot у yasno-state.json + стратегія конфліктів за updatedAt.
+  const snapshot=JSON.stringify(state); // те, що йде у yasno-state.json
+  if(driveReady()) drivePush(snapshot); // пуш у Drive (fire-and-forget)
   return snapshot;
 }
 function scheduleSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveState,300);}
+
+/* ===== Google Drive sync =====
+   Якщо CONFIG.CLIENT_ID порожній — синхронізація вимкнена, додаток працює локально.
+   Авторизація через Google Identity Services (token model, scope drive.file:
+   доступ лише до файлу, який створив сам додаток). Стан зберігається у yasno-state.json.
+   Стратегія конфліктів — «останній за updatedAt виграє». */
+const CONFIG={ CLIENT_ID:'447190317249-aens6r41urnqpmm8cj4ve2e8pilnl11q.apps.googleusercontent.com' };
+const DRIVE={ token:null, tokenClient:null, fileId:null, FILE:'yasno-state.json',
+  scope:'https://www.googleapis.com/auth/drive.file' };
+function driveReady(){ return !!(CONFIG.CLIENT_ID && DRIVE.token); }
+function driveEnabled(){ return !!CONFIG.CLIENT_ID; }
+
+function initDriveClient(){
+  if(!driveEnabled()) return false;
+  if(typeof google==='undefined'||!google.accounts||!google.accounts.oauth2) return false;
+  if(!DRIVE.tokenClient){
+    DRIVE.tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CONFIG.CLIENT_ID, scope:DRIVE.scope,
+      callback:async(resp)=>{ if(resp&&resp.access_token){ DRIVE.token=resp.access_token; setSyncStatus('sync'); await drivePull(); setSyncStatus('done'); }
+        else { setSyncStatus('error'); } },
+      error_callback:(err)=>{ console.warn('GIS', err); setSyncStatus('signin'); }
+    });
+  }
+  return true;
+}
+function driveSignIn(){
+  if(!initDriveClient()){ setSyncStatus('error'); return; }
+  setSyncStatus('sync');
+  DRIVE.tokenClient.requestAccessToken({ prompt: DRIVE.token?'':'consent' });
+}
+
+async function driveApi(url,opts){
+  const r=await fetch(url,{...opts, headers:{ Authorization:'Bearer '+DRIVE.token, ...(opts&&opts.headers||{}) }});
+  if(r.status===401){ DRIVE.token=null; setSyncStatus('signin'); throw new Error('drive 401'); }
+  if(!r.ok) throw new Error('drive '+r.status);
+  return r;
+}
+async function driveFindFile(){
+  const q=encodeURIComponent(`name='${DRIVE.FILE}' and trashed=false`);
+  const r=await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,modifiedTime)`);
+  const j=await r.json(); return (j.files&&j.files[0])||null;
+}
+async function driveDownload(id){
+  const r=await driveApi(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`);
+  return await r.json();
+}
+async function driveUpload(snapshotStr){
+  const meta={name:DRIVE.FILE, mimeType:'application/json'};
+  const boundary='yasno'+Math.random().toString(36).slice(2);
+  const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`+
+    `${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n`+
+    `${snapshotStr}\r\n--${boundary}--`;
+  const url=DRIVE.fileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${DRIVE.fileId}?uploadType=multipart&fields=id`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`;
+  const r=await driveApi(url,{ method:DRIVE.fileId?'PATCH':'POST',
+    headers:{ 'Content-Type':`multipart/related; boundary=${boundary}` }, body });
+  const j=await r.json(); if(j.id) DRIVE.fileId=j.id; return j;
+}
+// Підтягнути стан із Drive і змерджити за updatedAt; якщо файлу нема — створити з локального.
+async function drivePull(){
+  if(!driveReady()) return;
+  try{
+    const f=await driveFindFile();
+    if(!f){ await driveUpload(JSON.stringify(state)); return; }
+    DRIVE.fileId=f.id;
+    const remote=await driveDownload(f.id);
+    const localU=state.updatedAt||0, remoteU=(remote&&remote.updatedAt)||0;
+    if(remoteU>localU){
+      for(const k of STATE_KEYS){ if(k in remote){ state[k]=remote[k]; await backend.set(k,remote[k]); } }
+      state.updatedAt=remoteU; await backend.set('updatedAt',remoteU);
+      await renderAll();
+    } else if(localU>remoteU){
+      await driveUpload(JSON.stringify(state));
+    }
+  }catch(e){ console.warn('drivePull', e); }
+}
+let _pushTimer=null;
+function drivePush(snapshotStr){
+  if(!driveReady()) return;
+  clearTimeout(_pushTimer);
+  _pushTimer=setTimeout(async()=>{ try{ setSyncStatus('sync'); await driveUpload(snapshotStr||JSON.stringify(state)); setSyncStatus('done'); }
+    catch(e){ console.warn('drivePush', e); setSyncStatus('error'); } }, 800);
+}
+function setSyncStatus(s){
+  const b=document.getElementById('syncBtn'); if(!b) return;
+  const map={ signin:'☁︎ Увійти', sync:'⟳ Синхронізую…', done:'✓ Синхронізовано', error:'⚠ Помилка' };
+  b.textContent=map[s]||'☁︎ Синхронізація';
+}
 
 // Сумісний шар: усі наявні виклики йдуть через store.get/set без змін.
 const store={
@@ -1277,7 +1369,21 @@ async function openTabsEditor(){const tabs=await getTabs();
   openDrawer();}
 
 /* ===== init ===== */
-(async function(){await loadState();renderDawn();await renderTabs();await seedOnce();await renderToday();await renderPrioCards();await renderTasks();renderRecipes();await renderShop();await renderBooks();renderIdeas();renderActivity();await renderAffairs();await renderCal();})();
+async function renderAll(){renderDawn();await renderTabs();await renderToday();await renderPrioCards();await renderTasks();renderRecipes();await renderShop();await renderBooks();renderIdeas();renderActivity();await renderAffairs();await renderCal();}
+
+// Налаштувати кнопку синхронізації; спробувати тихий вхід (без вікна, якщо доступ уже надано).
+function setupSync(){
+  if(!driveEnabled()) return;
+  const b=document.getElementById('syncBtn');
+  if(b){ b.hidden=false; setSyncStatus('signin'); b.onclick=driveSignIn; }
+  let tries=0;
+  const tick=setInterval(()=>{
+    if(initDriveClient()){ clearInterval(tick); try{ DRIVE.tokenClient.requestAccessToken({prompt:''}); }catch(e){} }
+    else if(++tries>40){ clearInterval(tick); } // ~10с очікування завантаження GIS
+  },250);
+}
+
+(async function(){await loadState();await seedOnce();await renderAll();setupSync();})();
 </script>
 </body>
 </html>
