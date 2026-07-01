@@ -306,6 +306,10 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .dayadd label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;display:block;margin-bottom:3px}
 .tplrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .tplrow select{flex:1;min-width:160px}
+.daychips{display:flex;gap:5px;flex-wrap:wrap}
+.daychip{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;min-width:40px}
+.daychip.on{background:var(--spruce);color:#fff;border-color:var(--spruce)}
+.tm-row .tdays{font-size:11px;color:var(--slate);white-space:nowrap}
 
 /* conflicts */
 .warnbadge{position:absolute;top:2px;right:3px;font-size:11px;z-index:5;filter:drop-shadow(0 0 1px #fff)}
@@ -488,6 +492,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
           <div><label>Разів/тиж</label><input class="fld" id="ntTarget" type="number" min="1" max="14" value="3"></div>
           <div><button class="btn" id="ntAdd">Додати</button></div>
         </div>
+        <div style="margin-top:10px"><label style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Дні тижня <span style="text-transform:none;font-weight:400">(порожньо = щодня)</span></label><div class="daychips" id="ntDays"></div></div>
       </div>
       <div id="taskList" style="margin-top:14px"></div>
       <p class="note-soft">✎ — повне редагування (назва, час від–до, пріоритет, разів/тиждень, нотатки). ↑↓ — порядок.</p>
@@ -851,10 +856,17 @@ async function setDayPlans(d){await store.set('dayplans',d);}
 async function getDay(dk){const d=await getDayPlans();return d[dk]||{removed:{},over:{},add:[]};}
 async function saveDay(dk,patch){const d=await getDayPlans();const cur=d[dk]||{removed:{},over:{},add:[]};d[dk]={removed:{...cur.removed},over:{...cur.over},add:[...(cur.add||[])],...patch};await setDayPlans(d);}
 // effective plan for a given day = template − removed + per-day overrides + day-only tasks
-async function effectivePlan(dk){const tpl=await getTasks();const dp=await getDay(dk);
-  const base=tpl.filter(t=>!dp.removed[t.id]).map(t=>({...t,...(dp.over[t.id]||{}),origin:'tpl'}));
+async function effectivePlan(dk){const tpl=await getTasks();const dp=await getDay(dk);const wd=parse(dk).getDay();
+  // шаблонна задача потрапляє в день, якщо для неї не задано днів тижня, або цей день серед них
+  const base=tpl.filter(t=>!dp.removed[t.id] && (!t.days||!t.days.length||t.days.includes(wd))).map(t=>({...t,...(dp.over[t.id]||{}),origin:'tpl'}));
   const extra=(dp.add||[]).map(t=>({...t,origin:'day'}));
   return [...base,...extra];}
+// дні тижня для задач
+const WD=[['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Нд',0]];
+function dayChips(sel){sel=sel||[];return WD.map(([lbl,d])=>`<button type="button" class="daychip${sel.includes(d)?' on':''}" data-d="${d}">${lbl}</button>`).join('');}
+function bindDayChips(host){if(host)host.querySelectorAll('.daychip').forEach(b=>b.onclick=()=>b.classList.toggle('on'));}
+function collectDays(host){return host?[...host.querySelectorAll('.daychip.on')].map(b=>+b.dataset.d):[];}
+function daysLabel(days){if(!days||!days.length)return 'щодня';return WD.filter(([l,d])=>days.includes(d)).map(([l])=>l).join(' ');}
 // edit one task on one day (template task -> stored as override; day task -> edit add[])
 async function editDayTask(dk,id,origin,patch){const d=await getDayPlans();const cur=d[dk]||{removed:{},over:{},add:[]};
   if(origin==='day'){cur.add=(cur.add||[]).map(t=>t.id===id?{...t,...patch}:t);}
@@ -1014,13 +1026,15 @@ async function openTaskEditor(id,ctx){const scope=ctx?ctx.scope:'template';
     <label>Назва</label><input id="etTitle" value="${esc(t.title)}">
     <div class="two"><div><label>Від</label><input id="etStart" type="time" value="${t.start||''}"></div><div><label>До</label><input id="etEnd" type="time" value="${t.end||''}"></div></div>
     <label>Пріоритет</label><select id="etPrio">${PRIOS.map(p=>`<option value="${p.id}" ${p.id===t.prio?'selected':''}>${p.n}</option>`).join('')}</select>
-    ${scope==='template'?`<label>Разів на тиждень</label><input id="etTarget" type="number" min="1" max="21" value="${t.target||1}">`:''}
+    ${scope==='template'?`<label>Разів на тиждень</label><input id="etTarget" type="number" min="1" max="21" value="${t.target||1}">
+    <label>Дні тижня <span style="text-transform:none;font-weight:400;color:var(--muted)">(порожньо = щодня)</span></label><div class="daychips" id="etDays">${dayChips(t.days)}</div>`:''}
     <label>Нотатки</label><textarea id="etNotes" placeholder="Деталі, нагадування…">${esc(t.notes||'')}</textarea>
     <button class="btn" id="etSave" style="width:100%;margin-top:14px">Зберегти</button>
     <button class="btn ghost danger" id="etDel" style="width:100%;margin-top:8px">${scope==='day'?'Прибрати з цього дня':'Видалити завдання'}</button></div>`;
+  if(scope==='template')bindDayChips($('#etDays'));
   $('#etSave').onclick=async()=>{const patch={title:$('#etTitle').value.trim()||t.title,start:$('#etStart').value,end:$('#etEnd').value,prio:$('#etPrio').value,notes:$('#etNotes').value};
     if(scope==='day'){await editDayTask(ctx.dk,id,ctx.origin,patch);}
-    else{const ts=await getTasks();const x=ts.find(y=>y.id===id);if(x){Object.assign(x,patch);x.target=Math.max(1,+$('#etTarget').value||1);}await setTasks(ts);}
+    else{const ts=await getTasks();const x=ts.find(y=>y.id===id);if(x){Object.assign(x,patch);x.target=Math.max(1,+$('#etTarget').value||1);x.days=collectDays($('#etDays'));}await setTasks(ts);}
     closeDrawer();afterPlan();};
   $('#etDel').onclick=async()=>{
     if(scope==='day'){await removeDayTask(ctx.dk,id,ctx.origin);}
@@ -1054,9 +1068,10 @@ async function renderPrioCards(){const {byPrio}=await weekStats();
       <div style="position:relative"><div style="font-weight:700;font-size:14.5px;color:${p.c}">${p.n}</div>${body}</div></div>`;}).join('');}
 async function renderTasks(){const tasks=await getTasks();
   $('#ntPrio').innerHTML=PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('');
+  if($('#ntDays')&&!$('#ntDays').children.length){$('#ntDays').innerHTML=dayChips([]);bindDayChips($('#ntDays'));}
   $('#taskList').innerHTML=PRIOS.map(p=>{const list=tasks.filter(t=>t.prio===p.id);
     const rows=list.map((t,i)=>`<div class="tm-row" data-id="${t.id}">
-      <span class="ttl">${esc(t.title)}</span>${t.start?`<span class="tm-time">${t.start}${t.end?'–'+t.end:''}</span>`:''}<span class="tg">${t.target}×/тиж</span>
+      <span class="ttl">${esc(t.title)}</span>${t.start?`<span class="tm-time">${t.start}${t.end?'–'+t.end:''}</span>`:''}<span class="tdays">${daysLabel(t.days)}</span><span class="tg">${t.target}×/тиж</span>
       <button data-act="up" ${i===0?'style="visibility:hidden"':''}>↑</button><button data-act="down" ${i===list.length-1?'style="visibility:hidden"':''}>↓</button>
       <button data-act="edit">✎</button><button class="x" data-act="del">✕</button></div>`).join('');
     return `<div class="eyebrow" style="margin:14px 0 8px;color:${p.c}">${p.n}</div>${rows||'<p class="note-soft" style="margin:0 0 6px">Ще немає задач у цій категорії.</p>'}
@@ -1075,7 +1090,7 @@ async function renderTasks(){const tasks=await getTasks();
     const ci=box.querySelector('[data-ci]'),cs=box.querySelector('[data-cs]'),ce=box.querySelector('[data-ce]'),ct=box.querySelector('[data-ct]');
     const add=async()=>{const title=ci.value.trim();if(!title)return ci.focus();const ts=await getTasks();ts.push({id:uid(),title,prio:cat,target:Math.max(1,+ct.value||1),start:cs.value,end:ce.value,notes:''});await setTasks(ts);afterPlan();};
     box.querySelector('[data-cadd]').onclick=add;ci.addEventListener('keydown',e=>{if(e.key==='Enter')add();});});}
-$('#ntAdd').onclick=async()=>{const title=$('#ntTitle').value.trim();if(!title)return $('#ntTitle').focus();const ts=await getTasks();ts.push({id:uid(),title,prio:$('#ntPrio').value,target:Math.max(1,+$('#ntTarget').value||1),start:$('#ntStart').value,end:$('#ntEnd').value,notes:''});await setTasks(ts);$('#ntTitle').value='';$('#ntStart').value='';$('#ntEnd').value='';afterPlan();};
+$('#ntAdd').onclick=async()=>{const title=$('#ntTitle').value.trim();if(!title)return $('#ntTitle').focus();const ts=await getTasks();ts.push({id:uid(),title,prio:$('#ntPrio').value,target:Math.max(1,+$('#ntTarget').value||1),start:$('#ntStart').value,end:$('#ntEnd').value,notes:'',days:collectDays($('#ntDays'))});await setTasks(ts);$('#ntTitle').value='';$('#ntStart').value='';$('#ntEnd').value='';$('#ntDays').innerHTML=dayChips([]);bindDayChips($('#ntDays'));afterPlan();};
 
 /* ===== CALENDAR ===== */
 let viewDate=new Date(today),viewMode=(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:560px)').matches)?'day':'week';
