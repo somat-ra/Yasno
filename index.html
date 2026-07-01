@@ -616,7 +616,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
    куди підключиться синхронізація з Google Drive (див. decision-синхронізація.md). */
 
 // Усі ключі стану «Ясно». Цей список — джерело правди для синхронізації (один JSON у Drive).
-const STATE_KEYS=['tasks','events','log','affairs','dayplans','seeded','shop','shopCustom','books','bookState','tabs'];
+const STATE_KEYS=['tasks','events','log','affairs','dayplans','seeded','shop','shopCustom','books','bookState','tabs','overlapOk'];
 
 // Низькорівневий бекенд: window.storage → localStorage → памʼять (fallback).
 const _memBackend={};
@@ -836,6 +836,8 @@ async function getTasks(){return await store.get('tasks',DEFAULT_TASKS);}
 async function setTasks(t){await store.set('tasks',t);}
 async function getEvents(){return await store.get('events',{});}
 async function setEvents(e){await store.set('events',e);}
+async function getOverlapOk(){return await store.get('overlapOk',{});}
+async function setOverlapOk(o){await store.set('overlapOk',o);}
 async function getLog(){return await store.get('log',{});}
 async function toggleLog(taskId,dk){const log=await getLog();log[dk]=log[dk]||{};log[dk][taskId]=!log[dk][taskId];if(!log[dk][taskId])delete log[dk][taskId];await store.set('log',log);return log;}
 function byTime(a,b){return (a.start||'99:99').localeCompare(b.start||'99:99');}
@@ -892,7 +894,7 @@ let viewDay=new Date(today);
 function nowLineStyle(date){if(!sameDay(date,new Date()))return 'display:none';const n=new Date();const m=n.getHours()*60+n.getMinutes();if(m<GS*60||m>GE*60)return 'display:none';return `top:${(m-GS*60)/60*TLH}px`;}
 function blkStyle(b,g){const w=100/(b.cols||1);const left=(b.col||0)*w;return `top:${g.top}px;height:${g.h}px;--bc:${b._col};left:calc(${left}% + ${b.col?2:0}px);width:calc(${w}% - 3px)`;}
 async function renderToday(){
-  const dk=key(viewDay);const plan=await effectivePlan(dk);const log=await getLog();const st=log[dk]||{};const ev=(await getEvents())[dk]||[];const affD=(await affairsByDate())[dk]||[];
+  const dk=key(viewDay);const plan=await effectivePlan(dk);const log=await getLog();const st=log[dk]||{};const ev=(await getEvents())[dk]||[];const affD=(await affairsByDate())[dk]||[];const overlapOk=!!(await getOverlapOk())[dk];
   const isToday=sameDay(viewDay,today);
   $('#checkTitle').innerHTML=`${DOWfull[viewDay.getDay()]}, ${viewDay.getDate()} ${MON[viewDay.getMonth()]}`+(isToday?'<span class="dayflag today">сьогодні</span>':`<span class="dayflag other">${viewDay<today?'минуле':'план'}</span>`);
   $('#dayNav').className='daynav'+(viewDay>today?' future':viewDay<today?' past':'');
@@ -905,13 +907,19 @@ async function renderToday(){
   affD.filter(a=>a.start).forEach(a=>blocks.push({kind:'aff',id:a.id,sid:a.sid,title:'📋 '+a.title,_col:'#707A72',start:a.start,end:a.end,done:a.done}));
   const packed=packBlocks(blocks);
   const conflicts=packed.filter(b=>b.conflict).length;
-  $('#dayConflict').innerHTML=conflicts?`<div class="conflict-note">⚠️ <span>Є накладки в часі — блоки, що перетинаються, стоять поруч і підсвічені. Зміна Supplax не рахується (це фон).</span></div>`:'';
+  if(conflicts && !overlapOk){
+    $('#dayConflict').innerHTML=`<div class="conflict-note">⚠️ <span>Є накладки в часі — блоки, що перетинаються, стоять поруч і підсвічені. <a href="#" id="overlapDismiss" style="color:#8a5a14;font-weight:700">Зняти застереження</a> (роблю це одночасно).</span></div>`;
+  } else if(conflicts && overlapOk){
+    $('#dayConflict').innerHTML=`<p class="note-soft" style="margin:0 0 10px">Накладки на цей день приховано · <a href="#" id="overlapShow" style="color:var(--slate);font-weight:600">показати</a></p>`;
+  } else { $('#dayConflict').innerHTML=''; }
+  const _od=$('#overlapDismiss');if(_od)_od.onclick=async e=>{e.preventDefault();const o=await getOverlapOk();o[dk]=true;await setOverlapOk(o);renderToday();renderCal();};
+  const _os=$('#overlapShow');if(_os)_os.onclick=async e=>{e.preventDefault();const o=await getOverlapOk();delete o[dk];await setOverlapOk(o);renderToday();renderCal();};
   if(todayMode==='grid'){
     const allDay=[];ev.filter(e=>!e.t).forEach(e=>allDay.push({title:e.title,star:e.important,cat:e.cat}));affD.filter(a=>!a.start).forEach(x=>allDay.push({title:'📋 '+x.title,done:x.done}));
     let hrs='';for(let h=GS;h<=GE;h++)hrs+=`<div class="hr"><span>${pad(h%24)}:00</span></div>`;
     const blkHtml=packed.map(b=>{const g=geom(b.start,b.end,TLH);if(!g)return '';
-      return `<div class="tblock ${b.kind} ${b.done?'done':''} ${b.conflict?'conflict':''}" data-kind="${b.kind}" data-id="${b.id}" data-origin="${b.origin||''}" data-sid="${b.sid||''}" style="${blkStyle(b,g)}">
-        ${b.conflict?'<span class="warnbadge">⚠️</span>':''}
+      return `<div class="tblock ${b.kind} ${b.done?'done':''} ${(b.conflict&&!overlapOk)?'conflict':''}" data-kind="${b.kind}" data-id="${b.id}" data-origin="${b.origin||''}" data-sid="${b.sid||''}" style="${blkStyle(b,g)}">
+        ${(b.conflict&&!overlapOk)?'<span class="warnbadge">⚠️</span>':''}
         <div class="tb-in">${(b.kind==='task'||b.kind==='aff')?`<button class="tb-chk" data-act="chk">${b.done?'✓':''}</button>`:''}
           <div class="tb-txt"><b>${b.star?'★ ':''}${esc(b.title)}</b><span class="tb-time">${b.start||''}${b.end?'–'+b.end:''}</span>${b.notes?`<span class="tb-note">📝 ${esc(b.notes)}</span>`:''}</div>
           <div class="tb-ctl">${b.kind!=='aff'?'<button data-act="edit">✎</button>':''}<button data-act="del">✕</button></div></div>
@@ -919,6 +927,11 @@ async function renderToday(){
     host.innerHTML=`${allDay.length?`<div class="allday">${allDay.map(a=>`<span class="adchip ${a.done?'done':''}" style="${a.cat&&P[a.cat]?`border-left-color:${P[a.cat].c}`:''}">${a.star?'★ ':''}${esc(a.title)}</span>`).join('')}</div>`:''}
       <div class="tgrid">${hrs}<div class="tblocks">${blkHtml}<div class="nowline" style="${nowLineStyle(viewDay)}"></div></div></div>`;
     bindTimeline(host,dk);
+    // клік по вільному місцю сітки — додати подію на цей час (відкриває день із підставленим часом)
+    const _grid=host.querySelector('.tgrid');
+    if(_grid)_grid.addEventListener('click',e=>{ if(e.target.closest('.tblock'))return;
+      const rect=_grid.getBoundingClientRect();let m=Math.round((GS*60+(e.clientY-rect.top)/TLH*60)/30)*30;
+      m=Math.max(GS*60,Math.min(GE*60,m));openDay(dk,fmtMin(m)); });
   } else if(todayMode==='list'){
     const sorted=[...plan].sort(byTime);
     host.innerHTML='<ul class="cl">'+sorted.map(t=>taskRow(t,st,'')).join('')+'</ul>';
@@ -1079,7 +1092,7 @@ async function renderUpnext(){const ev=await getEvents();const aff=await affairs
 async function renderCal(){
   $$('#v-cal .seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===viewMode));
   await renderUpnext();
-  const body=$('#calBody'),title=$('#calTitle'),ev=await getEvents(),aff=await affairsByDate();
+  const body=$('#calBody'),title=$('#calTitle'),ev=await getEvents(),aff=await affairsByDate(),overlapOk=await getOverlapOk();
   if(viewMode==='day'||viewMode==='week'){
     const isDay=viewMode==='day';
     const days=isDay?[new Date(viewDate)]:[...Array(7)].map((_,i)=>{const s=startOfWeek(viewDate);const d=new Date(s);d.setDate(s.getDate()+i);return d;});
@@ -1095,7 +1108,7 @@ async function renderCal(){
       (ev[dk]||[]).filter(e=>e.t).forEach(e=>blks.push({kind:'event',title:(e.important?'★ ':'')+e.title,_col:P[e.cat]?P[e.cat].c:'#999',start:e.t,end:e.end}));
       (aff[dk]||[]).filter(a=>a.start).forEach(a=>blks.push({kind:'aff',title:'📋 '+a.title,_col:'#707A72',start:a.start,end:a.end}));
       const packed=packBlocks(blks);
-      const bh=packed.map(b=>{const g=geom(b.start,b.end,PXH);if(!g)return '';const w=100/(b.cols||1),left=(b.col||0)*w;return `<div class="wblk ${b.kind} ${b.conflict?'conflict':''}" style="top:${g.top}px;height:${g.h}px;--bc:${b._col};left:calc(${left}% + 2px);width:calc(${w}% - 3px)">${b.conflict?'<span style="position:absolute;top:0;right:1px;font-size:9px">⚠️</span>':''}<b>${esc(b.title)}</b><span style="font-family:Oswald;font-size:9px;color:var(--muted)">${b.start}</span></div>`;}).join('');
+      const bh=packed.map(b=>{const g=geom(b.start,b.end,PXH);if(!g)return '';const w=100/(b.cols||1),left=(b.col||0)*w;return `<div class="wblk ${b.kind} ${(b.conflict&&!overlapOk[dk])?'conflict':''}" style="top:${g.top}px;height:${g.h}px;--bc:${b._col};left:calc(${left}% + 2px);width:calc(${w}% - 3px)">${(b.conflict&&!overlapOk[dk])?'<span style="position:absolute;top:0;right:1px;font-size:9px">⚠️</span>':''}<b>${esc(b.title)}</b><span style="font-family:Oswald;font-size:9px;color:var(--muted)">${b.start}</span></div>`;}).join('');
       let gh='';for(let h=GS;h<=GE;h++)gh+='<div class="gh"></div>';
       return `<div class="wkcol ${sameDay(d,today)?'today':''}" data-k="${dk}">${gh}${bh}${sameDay(d,new Date())?`<div class="nowline" style="${nowLineStyle(d).replace(/top:(\d+(\.\d+)?)px/,(m,p)=>'top:'+(parseFloat(p)/TLH*PXH)+'px')}"></div>`:''}</div>`;}).join('');
     body.innerHTML=`<div class="wkgrid-wrap">${head}${adRow}<div class="wkbody" style="grid-template-columns:${cols}"><div class="gutcol">${hgut}</div>${cells}</div></div>`;
