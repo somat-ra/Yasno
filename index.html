@@ -877,7 +877,10 @@ function packBlocks(blocks){ // assigns .col .cols (layout) and .conflict (true 
 
 async function weekStats(){const tasks=await getTasks(),log=await getLog();const ws=startOfWeek(today);const days=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);days.push(key(d));}
   const elapsed=Math.min(7,Math.round((today-ws)/864e5)+1);const pace=elapsed/7;const byPrio={};PRIOS.forEach(p=>byPrio[p.id]={done:0,target:0});
-  tasks.forEach(t=>{if(!byPrio[t.prio])return;byPrio[t.prio].target+=t.target;days.forEach(dk=>{if(log[dk]&&log[dk][t.id])byPrio[t.prio].done++;});});
+  // цілі — із шаблону пріоритетів
+  tasks.forEach(t=>{if(byPrio[t.prio])byPrio[t.prio].target+=t.target;});
+  // виконане — за фактичним планом кожного дня: і шаблонні задачі, і додані на день
+  for(const dk of days){const l=log[dk];if(!l)continue;const plan=await effectivePlan(dk);plan.forEach(t=>{if(l[t.id]&&byPrio[t.prio])byPrio[t.prio].done++;});}
   // відмічені події з категорією теж рухають прогрес своєї категорії (справи — ні)
   const events=await getEvents();days.forEach(dk=>{(events[dk]||[]).forEach(e=>{if(e.done&&byPrio[e.cat])byPrio[e.cat].done++;});});
   return {byPrio,pace};}
