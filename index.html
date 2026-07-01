@@ -819,16 +819,17 @@ function renderDawn(){const p=pregInfo();const wed=new Date(2026,5,17);const dm=
     <div class="pill rose"><div class="lbl">Вагітність</div><div class="val">${p.wk}<small> тиж </small>${p.dy}<small> дн</small></div></div>
     <div class="pill"><div class="lbl">До зустрічі (≈ПДР)</div><div class="val">${p.left}<small> днів</small></div></div>
     <div class="pill"><div class="lbl">Орієнтовна дата</div><div class="val" style="font-size:17px">${p.edd.getDate()} ${MON[p.edd.getMonth()]}</div></div>
-    <div class="pill" id="nextPill"><div class="lbl">Найближча подія</div><div class="val" style="font-size:15px">—</div></div>
+    <div class="pill" id="nextPill"><div class="lbl">Потребує уваги</div><div class="val" style="font-size:15px">—</div></div>
     <div class="pill"><div class="lbl">Одружені</div><div class="val">${dm}<small> днів</small></div></div>`;
   fillNextPill();}
-async function fillNextPill(){const el=$('#nextPill');if(!el)return;const ev=await getEvents();const aff=await affairsByDate();const rows=[];
-  Object.keys(ev).forEach(k=>{const d=parse(k);if(d>=today)ev[k].forEach(e=>{if(e.important)rows.push({d,title:e.title});});});
-  Object.keys(aff).forEach(k=>{const d=parse(k);if(d>=today)aff[k].forEach(x=>{if(!x.done)rows.push({d,title:x.title});});});
-  rows.sort((a,b)=>a.d-b.d);
-  if(!rows.length){el.querySelector('.val').innerHTML='нема';return;}
-  const r=rows[0];const days=Math.round((r.d-today)/864e5);const when=days===0?'сьогодні':days===1?'завтра':`за ${days} дн`;
-  el.querySelector('.val').innerHTML=`${esc(r.title).slice(0,22)}<small> · ${when}</small>`;}
+// Показує пріоритет, який найбільше недобирає темпу цього тижня (або «всі в нормі»).
+async function fillNextPill(){const el=$('#nextPill');if(!el)return;const val=el.querySelector('.val');
+  const {byPrio,pace}=await weekStats();
+  let worst=null,worstGap=0.0001;
+  TRACKED.forEach(p=>{const b=byPrio[p.id];const tgt=b.target||0;if(!tgt)return;const gap=tgt*pace-b.done;if(gap>worstGap){worstGap=gap;worst=p;}});
+  if(!worst){val.innerHTML='усі в нормі ✓';return;}
+  const b=byPrio[worst.id];
+  val.innerHTML=`⚠ ${esc(worst.sh)} <small>${b.done}/${b.target||0}</small>`;}
 
 /* ===== data ===== */
 async function getTasks(){return await store.get('tasks',DEFAULT_TASKS);}
@@ -1292,6 +1293,12 @@ const ACTIVITY=[
     {t:'Велотренажер 20–30 хв',d:'Спокійний опір, рівне дихання'},
     {t:'Сайкл-розминка 10 хв',d:'Перед силовою як розігрів'},
     {t:'Спокійна їзда рівним',d:'Тільки безпечний маршрут, без перепадів'}]},
+  {id:'swim',name:'Плавання',icon:'🏊',note:'Чудове для вагітних: вода знімає навантаження зі спини й суглобів, менший ризик перегріву. Уникай пірнання й затримки дихання, заходь у воду обережно.',items:[
+    {t:'Спокійне плавання 20–30 хв',d:'Брас або кроль у комфортному темпі'},
+    {t:'Аквааеробіка для вагітних',d:'Група або за відео, м’яке навантаження'},
+    {t:'Ходьба у воді',d:'По груди у воді, 10–15 хв'},
+    {t:'Вправи біля бортика',d:'Махи ногами, розтяжка, тримаючись за край'},
+    {t:'Плавання з дошкою',d:'Ноги працюють, руки на дошці — легко для спини'}]},
   {id:'gym',name:'Зал',icon:'🏋️',note:'Тренажери з опорою стабільніші за вільні ваги. Уникай положення лежачи на спині надовго, максимальних ваг і затримки дихання.',items:[
     {t:'Жим ногами (легко-помірно)',d:'Тренажер, повний контроль, без «до відмови»'},
     {t:'Тяга верхнього блоку',d:'Спина, сидячи з опорою'},
