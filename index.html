@@ -6,7 +6,7 @@
 <title>Дашборд Аліни</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
@@ -18,8 +18,8 @@
   --ok:#2E6E5A;--over:#3E6B7A;--under:#C9722B;
 }
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--mist);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
-h1,h2,h3,h4,.disp{font-family:'Oswald','Inter',sans-serif;letter-spacing:.01em}
+body{font-family:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--mist);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4,.disp{font-family:'Nunito','Nunito',sans-serif;letter-spacing:.01em}
 button{font-family:inherit}::selection{background:var(--amber);color:#fff}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px 96px}
 header.top{position:sticky;top:0;z-index:40;color:#fff;margin:0 -16px;padding:14px 16px 12px;background:linear-gradient(160deg,#24433c,#1F3A34 60%,#1a322c)}
@@ -29,7 +29,7 @@ header.top{position:sticky;top:0;z-index:40;color:#fff;margin:0 -16px;padding:14
 .dawn{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .dawn .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 12px;min-width:118px;flex:1 1 118px}
 .dawn .pill .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#a9c6bb}
-.dawn .pill .val{font-family:'Oswald';font-size:21px;font-weight:600;line-height:1.1;margin-top:2px}
+.dawn .pill .val{font-family:'Nunito';font-size:21px;font-weight:600;line-height:1.1;margin-top:2px}
 .dawn .pill .val small{font-size:12px;font-weight:400;color:#cfe0d8}
 .dawn .pill.rose{background:rgba(201,123,132,.22);border-color:rgba(201,123,132,.4)}
 nav.tabs{position:sticky;top:0;z-index:35;background:var(--mist);display:flex;gap:4px;overflow-x:auto;padding:10px 0 8px;margin:0 -4px;scrollbar-width:none}
@@ -70,7 +70,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .tgrid{position:relative;margin-top:4px}
 .tgrid .hr{position:relative;height:46px;border-top:1px solid var(--line)}
 .tgrid .hr:last-child{border-bottom:1px solid var(--line)}
-.tgrid .hr>span{position:absolute;top:-8px;left:0;font-family:'Oswald';font-size:11px;color:var(--muted);background:var(--card);padding-right:6px}
+.tgrid .hr>span{position:absolute;top:-8px;left:0;font-family:'Nunito';font-size:11px;color:var(--muted);background:var(--card);padding-right:6px}
 .tblocks{position:absolute;top:0;left:48px;right:4px;bottom:0}
 .tblock{position:absolute;left:0;right:0;background:#fff;border:1px solid var(--line);border-left:4px solid var(--bc);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(31,58,52,.08);cursor:grab;touch-action:none}
 .tblock.task{background:#fbfdfb}
@@ -82,7 +82,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .tblock.done .tb-chk{background:var(--spruce2);border-color:var(--spruce2)}
 .tb-txt{flex:1;min-width:0;font-size:12px;line-height:1.25;overflow:hidden}
 .tb-txt b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb-time{font-family:'Oswald';font-size:10.5px;color:var(--muted)}
+.tb-time{font-family:'Nunito';font-size:10.5px;color:var(--muted)}
 .tb-note{display:block;font-size:10.5px;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb-ctl{display:flex;gap:1px;flex:0 0 auto}
 .tb-ctl button{border:0;background:transparent;color:#aab2ac;font-size:12px;cursor:pointer;padding:1px 2px;border-radius:5px}
@@ -99,7 +99,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .cl li.done .box{background:var(--spruce2);border-color:var(--spruce2)}
 .cl li.done .txt{text-decoration:line-through;color:var(--muted)}
 .cl .pcdot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
-.cl .etime{font-family:'Oswald';font-weight:600;font-size:12px;color:var(--spruce);flex:0 0 84px}
+.cl .etime{font-family:'Nunito';font-weight:600;font-size:12px;color:var(--spruce);flex:0 0 84px}
 .cl .etime.none{color:#bcc4be}
 .cl .txt{flex:1;font-size:14px}.cl .meta{font-size:11.5px;color:var(--muted)}
 .cl .tnote{display:block;font-size:11.5px;color:var(--slate)}
@@ -107,7 +107,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .cl .ctrl button{border:0;background:transparent;color:#b3bbb5;cursor:pointer;font-size:14px;padding:2px 3px;border-radius:6px}
 .cl .ctrl button:hover{color:var(--spruce);background:var(--mist)}
 .cl .ctrl .x:hover{color:var(--rose)}
-.timehdr{font-family:'Oswald';font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 2px}
+.timehdr{font-family:'Nunito';font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 2px}
 
 /* weekly progress */
 .wk-prio{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
@@ -117,14 +117,14 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .wk-prio .bar{flex:1;height:9px;border-radius:999px;background:var(--mist2);overflow:hidden;position:relative}
 .wk-prio .bar>span{display:block;height:100%;border-radius:999px}
 .wk-prio .bar>.pace{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.35}
-.wk-prio .stat{flex:0 0 92px;text-align:right;font-family:'Oswald';font-size:13px}
+.wk-prio .stat{flex:0 0 92px;text-align:right;font-family:'Nunito';font-size:13px}
 .tag-ok{color:var(--ok)}.tag-over{color:var(--over)}.tag-under{color:var(--under)}
 
 /* task manager */
 .tm-row{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px}
 .tm-row .ttl{flex:1;font-size:14px;font-weight:600}
-.tm-row .tm-time{font-family:'Oswald';font-size:12.5px;color:var(--slate);white-space:nowrap}
-.tm-row .tg{font-family:'Oswald';font-size:13px;color:var(--muted);white-space:nowrap}
+.tm-row .tm-time{font-family:'Nunito';font-size:12.5px;color:var(--slate);white-space:nowrap}
+.tm-row .tg{font-family:'Nunito';font-size:13px;color:var(--muted);white-space:nowrap}
 .tm-row button{border:0;background:transparent;cursor:pointer;font-size:15px;color:#b3bbb5;padding:2px 4px;border-radius:6px}
 .tm-row button:hover{color:var(--spruce);background:var(--mist)}.tm-row .x:hover{color:var(--rose)}
 .addgrid{display:grid;grid-template-columns:1fr 96px 96px 150px 80px auto;gap:8px;align-items:end}
@@ -135,12 +135,12 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .cal-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .nav-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:18px;color:var(--spruce)}
 .nav-btn:hover{background:var(--mist)}
-.cal-title{font-family:'Oswald';font-weight:600;font-size:20px;text-transform:capitalize;min-width:140px}
+.cal-title{font-family:'Nunito';font-weight:600;font-size:20px;text-transform:capitalize;min-width:140px}
 .today-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer;color:var(--spruce)}
 .upnext{margin-bottom:14px}
 .up-row{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer}
 .up-row:last-child{border-bottom:0}
-.up-row .ud{font-family:'Oswald';font-weight:600;font-size:14px;flex:0 0 90px;color:var(--spruce)}
+.up-row .ud{font-family:'Nunito';font-weight:600;font-size:14px;flex:0 0 90px;color:var(--spruce)}
 .up-row .ut{flex:1;font-size:13.5px}.up-row .star{color:var(--amber)}
 .up-empty{font-size:13px;color:var(--muted);padding:6px 0}
 
@@ -151,7 +151,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .wkhead .wh{padding:8px 6px;text-align:center;cursor:pointer;border-left:1px solid var(--line)}
 .wkhead .wh.today{background:rgba(226,151,47,.12)}
 .wkhead .wh .dw{font-size:10.5px;text-transform:uppercase;color:var(--muted)}
-.wkhead .wh .dn{font-family:'Oswald';font-weight:600;font-size:17px}
+.wkhead .wh .dn{font-family:'Nunito';font-weight:600;font-size:17px}
 .wkad{display:grid;grid-template-columns:48px repeat(7,minmax(96px,1fr));border-bottom:1px solid var(--line)}
 .wkad .gut{font-size:9px;color:var(--muted);padding:3px}
 .wkad .adcell{border-left:1px solid var(--line);padding:3px;min-height:22px;display:flex;flex-direction:column;gap:2px}
@@ -159,7 +159,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .wkbody{display:grid;grid-template-columns:48px repeat(7,minmax(96px,1fr));position:relative}
 .wkbody .gutcol{position:relative}
 .wkbody .gutcol .gh{height:42px;border-top:1px solid var(--line);position:relative}
-.wkbody .gutcol .gh span{position:absolute;top:-7px;right:5px;font-family:'Oswald';font-size:10px;color:var(--muted)}
+.wkbody .gutcol .gh span{position:absolute;top:-7px;right:5px;font-family:'Nunito';font-size:10px;color:var(--muted)}
 .wkcol{position:relative;border-left:1px solid var(--line);cursor:pointer}
 .wkcol .gh{height:42px;border-top:1px solid var(--line)}
 .wkcol.today{background:rgba(226,151,47,.05)}
@@ -173,7 +173,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .mday{background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:78px;padding:6px;cursor:pointer;transition:.12s;position:relative}
 .mday:hover{border-color:var(--spruce2)}.mday.out{opacity:.4}
 .mday.today{border-color:var(--amber);box-shadow:0 0 0 2px rgba(226,151,47,.25)}
-.mday .n{font-family:'Oswald';font-weight:600;font-size:15px}
+.mday .n{font-family:'Nunito';font-weight:600;font-size:15px}
 .mday .mini{font-size:9.5px;line-height:1.3;margin-top:2px;overflow:hidden;max-height:46px}
 .mday .mini .mi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mday .star{position:absolute;top:5px;right:6px;color:var(--amber);font-size:11px}
@@ -183,7 +183,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 @media(max-width:420px){.year{grid-template-columns:1fr}}
 .ymonth{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;transition:.15s}
 .ymonth:hover{border-color:var(--spruce2);transform:translateY(-2px)}
-.ymonth h4{margin:0 0 6px;font-family:'Oswald';text-transform:capitalize;font-size:15px}
+.ymonth h4{margin:0 0 6px;font-family:'Nunito';text-transform:capitalize;font-size:15px}
 .ygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .ygrid span{font-size:10px;text-align:center;padding:2px 0;border-radius:4px;color:var(--muted)}
 .ygrid span.has{background:var(--spruce);color:#fff;font-weight:600}
@@ -194,12 +194,12 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .drawer{position:fixed;z-index:61;background:var(--mist);right:0;top:0;bottom:0;width:min(440px,94vw);transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.18)}
 .drawer.on{transform:none}
 .drawer .dhd{padding:18px 18px 12px;background:var(--spruce);color:#fff;position:relative}
-.drawer .dhd .dt{font-family:'Oswald';font-size:22px;font-weight:600;text-transform:capitalize}
+.drawer .dhd .dt{font-family:'Nunito';font-size:22px;font-weight:600;text-transform:capitalize}
 .drawer .dhd .ds{font-size:12.5px;color:#bcd2c8}
 .drawer .dbody{padding:16px 18px;overflow:auto;flex:1}
 .drawer .close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:0;color:#fff;width:34px;height:34px;border-radius:9px;font-size:18px;cursor:pointer}
 .ev-row{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px}
-.ev-row .et{font-family:'Oswald';font-weight:600;color:var(--spruce);font-size:13px;flex:0 0 56px}
+.ev-row .et{font-family:'Nunito';font-weight:600;color:var(--spruce);font-size:13px;flex:0 0 56px}
 .ev-row .ex{flex:1;font-size:13.5px}.ev-row .erm{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
 .ev-row.plan{opacity:.85}.ev-row.plan .et{color:var(--slate)}
 .ev-row.aff{background:#f3f6f4}
@@ -221,10 +221,10 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .fb[aria-pressed="true"]{background:var(--spruce);color:#fff;border-color:var(--spruce)}
 .recipe{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
 .recipe .rh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;cursor:pointer}
-.recipe .rname{font-family:'Oswald';font-weight:600;font-size:16px}
+.recipe .rname{font-family:'Nunito';font-weight:600;font-size:16px}
 .recipe .rtag{font-size:11px;text-transform:uppercase;color:#fff;padding:3px 8px;border-radius:999px;background:var(--slate);white-space:nowrap}
 .recipe .rdetail{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
-.recipe.open .rdetail{display:block}.recipe .prod{font-size:13px;margin:0 0 10px}.recipe .prod b{font-family:'Oswald'}
+.recipe.open .rdetail{display:block}.recipe .prod{font-size:13px;margin:0 0 10px}.recipe .prod b{font-family:'Nunito'}
 .recipe ol{margin:8px 0 0;padding-left:20px;font-size:13.5px}.recipe ol li{margin:4px 0}
 .recipe .note{font-size:12.5px;color:var(--muted);margin-top:10px;background:var(--mist);padding:8px 10px;border-radius:8px}
 .shop{columns:2;column-gap:18px}@media(max-width:560px){.shop{columns:1}}
@@ -238,11 +238,11 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 /* weekend */
 .roulette{background:linear-gradient(135deg,#24433c,#2E6E5A);color:#fff;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
 .roulette .rlabel{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#bcd2c8}
-.roulette .rpick{font-family:'Oswald';font-size:22px;font-weight:600;margin:6px 0 4px;min-height:30px}
+.roulette .rpick{font-family:'Nunito';font-size:22px;font-weight:600;margin:6px 0 4px;min-height:30px}
 .roulette .rwhy{font-size:12.5px;color:#d3e2da}
 .roulette button{margin-top:12px;background:var(--amber);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px}
 .idea{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
-.idea .ih{font-family:'Oswald';font-weight:600;font-size:15px;margin-bottom:6px}.idea ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}.idea ul li{margin:3px 0}
+.idea .ih{font-family:'Nunito';font-weight:600;font-size:15px;margin-bottom:6px}.idea ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}.idea ul li{margin:3px 0}
 .idea .badge{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--spruce2);background:#e4efe9;border-radius:999px;padding:2px 8px;margin-top:8px}
 
 /* books */
@@ -286,8 +286,8 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .brandrow{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .todaycard{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 16px;text-align:right;min-width:172px}
 .todaycard .tcl{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:#a9c6bb}
-.todaycard .tcd{font-family:'Oswald';font-weight:600;font-size:15px;color:#fff;margin-top:1px}
-.todaycard .tcb{font-family:'Oswald';font-weight:700;font-size:30px;color:#fff;line-height:1}
+.todaycard .tcd{font-family:'Nunito';font-weight:600;font-size:15px;color:#fff;margin-top:1px}
+.todaycard .tcb{font-family:'Nunito';font-weight:700;font-size:30px;color:#fff;line-height:1}
 @media(max-width:560px){.todaycard{flex:1;text-align:left}}
 
 /* today day navigation */
@@ -346,7 +346,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 
 /* activity */
 .actcat{margin-bottom:8px}
-.actcat .acthd{display:flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:600;font-size:16px;margin:14px 0 8px}
+.actcat .acthd{display:flex;align-items:center;gap:8px;font-family:'Nunito';font-weight:600;font-size:16px;margin:14px 0 8px}
 .actcat .actnote{font-size:12.5px;color:var(--muted);margin:-4px 0 10px}
 .actitem{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
 .actitem .ai-main{flex:1;min-width:0}
@@ -362,6 +362,43 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .acttray .trbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
 .acttray .trbar input[type=time]{border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px;background:#fff}
 
+/* ===== мобільна полірування (телефон ≤560px) ===== */
+@media(max-width:560px){
+  .wrap{padding:0 12px 90px}
+  /* шапка не «прибита» — прокручується, не перекриває вигляд; угорі лишається липке меню вкладок */
+  header.top{position:static;padding:12px 12px 10px}
+  .brand h1{font-size:21px}
+  /* кнопка синхронізації — широка, на свій рядок, зручна для пальця */
+  #syncBtn{margin-left:0!important;flex:1 0 100%!important;text-align:center!important;padding:11px 14px!important;font-size:14px!important}
+  /* перемикачі — більші тач-зони */
+  .seg button{padding:9px 14px;font-size:13px}
+  .tab{padding:9px 15px;font-size:14px}
+  .fb{padding:8px 14px}
+  /* навігація днями/календарем */
+  .daynav .nb{width:40px;height:40px;font-size:18px}
+  .daynav .tdc{padding:8px 12px;font-size:13px}
+  .nav-btn{width:40px;height:40px}
+  /* чекбокси — більші */
+  .cl .box{width:26px;height:26px;flex-basis:26px;font-size:15px}
+  .aff .abox{width:26px;height:26px;flex-basis:26px;font-size:14px}
+  .ev-row .achk{width:26px;height:26px;flex-basis:26px;font-size:14px}
+  .tb-chk{width:22px;height:22px;flex-basis:22px;font-size:13px}
+  .shop input{width:22px;height:22px}
+  /* кнопки дій ✎ / ✕ — більші тач-зони */
+  .cl .ctrl button{font-size:18px;padding:6px 9px}
+  .tm-row button{font-size:18px;padding:6px 9px}
+  .aff .ax,.aff .secdel{font-size:18px;padding:5px 8px}
+  .aff .amove button{font-size:15px;padding:3px 7px}
+  .book .bx{font-size:18px;padding:4px 7px}
+  .ev-row .erm{font-size:20px;padding:4px 8px}
+  .tb-ctl button{font-size:14px;padding:3px 5px}
+  .actitem .ai-add{width:40px;height:40px;font-size:20px}
+  /* трохи більші дрібні шрифти на стрічці дня */
+  .tb-txt{font-size:12.5px}
+  .tb-time,.tb-note{font-size:11px}
+  /* рядки задач переносяться, не обрізаються */
+  .tm-row{flex-wrap:wrap}
+}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -372,7 +409,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
       <div class="brand"><h1>Ясно</h1><span class="sub">персональний дашборд</span></div>
       <div class="todaycard" id="todayCard"></div>
       <button id="syncBtn" title="Синхронізація з Google Drive" hidden
-        style="margin-left:auto;align-self:flex-start;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 14px;font:600 13px/1 Inter,sans-serif;cursor:pointer;white-space:nowrap">☁︎ Синхронізація</button>
+        style="margin-left:auto;align-self:flex-start;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 14px;font:700 13px/1 Nunito,sans-serif;cursor:pointer;white-space:nowrap">☁︎ Синхронізація</button>
     </div>
     <div class="dawn" id="dawn"></div>
   </div>
@@ -559,7 +596,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
       <div id="affairsBody"></div>
     </section>
   </main>
-  <p class="foot">Живий дашборд · усе зберігається на цьому пристрої · не синхронізується між пристроями</p>
+  <p class="foot">Живий дашборд · синхронізується через Google Drive (увійди вгорі праворуч)</p>
 </div>
 
 <div class="scrim" id="scrim"></div>
@@ -1009,7 +1046,7 @@ async function renderTasks(){const tasks=await getTasks();
 $('#ntAdd').onclick=async()=>{const title=$('#ntTitle').value.trim();if(!title)return $('#ntTitle').focus();const ts=await getTasks();ts.push({id:uid(),title,prio:$('#ntPrio').value,target:Math.max(1,+$('#ntTarget').value||1),start:$('#ntStart').value,end:$('#ntEnd').value,notes:''});await setTasks(ts);$('#ntTitle').value='';$('#ntStart').value='';$('#ntEnd').value='';afterPlan();};
 
 /* ===== CALENDAR ===== */
-let viewDate=new Date(today),viewMode='week';
+let viewDate=new Date(today),viewMode=(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:560px)').matches)?'day':'week';
 async function seedOnce(){const seeded=await store.get('seeded',{});if(!seeded.v1){const ev=await getEvents();const k='2026-07-04';ev[k]=ev[k]||[];ev[k].push({id:uid(),t:'09:00',end:'10:00',title:'Аналізи + документ на декрет (Перинатальний)',cat:'vag',important:true});await setEvents(ev);seeded.v1=true;await store.set('seeded',seeded);}}
 async function renderUpnext(){const ev=await getEvents();const aff=await affairsByDate();const rows=[];
   Object.keys(ev).forEach(k=>{const d=parse(k);if(d>=today)ev[k].forEach(e=>rows.push({d,k,title:e.title,t:e.t,important:e.important,cat:e.cat}));});
@@ -1376,11 +1413,9 @@ function setupSync(){
   if(!driveEnabled()) return;
   const b=document.getElementById('syncBtn');
   if(b){ b.hidden=false; setSyncStatus('signin'); b.onclick=driveSignIn; }
+  // Лише підготувати клієнт (без авто-входу) — авторизація відбувається по кліку кнопки.
   let tries=0;
-  const tick=setInterval(()=>{
-    if(initDriveClient()){ clearInterval(tick); try{ DRIVE.tokenClient.requestAccessToken({prompt:''}); }catch(e){} }
-    else if(++tries>40){ clearInterval(tick); } // ~10с очікування завантаження GIS
-  },250);
+  const tick=setInterval(()=>{ if(initDriveClient()||++tries>40) clearInterval(tick); },250);
 }
 
 (async function(){await loadState();await seedOnce();await renderAll();setupSync();})();
