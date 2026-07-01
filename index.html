@@ -331,6 +331,9 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .ev-row.aff.done .ex{text-decoration:line-through;color:var(--muted)}
 .ev-row.plan .ex{cursor:pointer}
 .ev-row.plan .ex:hover{color:var(--spruce)}
+.ev-row .echk{flex:0 0 20px;width:20px;height:20px;border:2px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;cursor:pointer;background:#fff}
+.ev-row.ev.done .echk{background:var(--spruce2);border-color:var(--spruce2)!important}
+.ev-row.ev.done .ex{text-decoration:line-through;color:var(--muted)}
 
 /* tab editor */
 .tab.tabedit{border-style:dashed;color:var(--slate)}
@@ -381,7 +384,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
   /* чекбокси — більші */
   .cl .box{width:26px;height:26px;flex-basis:26px;font-size:15px}
   .aff .abox{width:26px;height:26px;flex-basis:26px;font-size:14px}
-  .ev-row .achk{width:26px;height:26px;flex-basis:26px;font-size:14px}
+  .ev-row .achk,.ev-row .echk{width:26px;height:26px;flex-basis:26px;font-size:14px}
   .tb-chk{width:22px;height:22px;flex-basis:22px;font-size:13px}
   .shop input{width:22px;height:22px}
   /* кнопки дій ✎ / ✕ — більші тач-зони */
@@ -659,10 +662,19 @@ function scheduleSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveState
    доступ лише до файлу, який створив сам додаток). Стан зберігається у yasno-state.json.
    Стратегія конфліктів — «останній за updatedAt виграє». */
 const CONFIG={ CLIENT_ID:'447190317249-aens6r41urnqpmm8cj4ve2e8pilnl11q.apps.googleusercontent.com' };
-const DRIVE={ token:null, tokenClient:null, fileId:null, FILE:'yasno-state.json',
+const DRIVE={ token:null, expiry:0, tokenClient:null, fileId:null, FILE:'yasno-state.json',
   scope:'https://www.googleapis.com/auth/drive.file' };
 function driveReady(){ return !!(CONFIG.CLIENT_ID && DRIVE.token); }
 function driveEnabled(){ return !!CONFIG.CLIENT_ID; }
+
+// Кеш токена: щоб не входити щоразу. Токен Google живе ~1 год — зберігаємо його
+// й термін дії локально, і повторно використовуємо в межах цього часу.
+function saveDriveToken(){ try{ localStorage.setItem('yo:driveTok',JSON.stringify({t:DRIVE.token,exp:DRIVE.expiry})); localStorage.setItem('yo:driveGranted','1'); }catch(e){} }
+function loadDriveToken(){ try{ const r=JSON.parse(localStorage.getItem('yo:driveTok')||'null'); if(r&&r.t&&r.exp>Date.now()+60000){ DRIVE.token=r.t; DRIVE.expiry=r.exp; return true; } }catch(e){} return false; }
+function clearDriveToken(){ DRIVE.token=null; DRIVE.expiry=0; try{ localStorage.removeItem('yo:driveTok'); }catch(e){} }
+function driveGrantedBefore(){ try{ return localStorage.getItem('yo:driveGranted')==='1'; }catch(e){ return false; } }
+// Тихе поновлення токена без вікна (спрацьовує, якщо доступ уже надано раніше).
+function driveSilent(){ if(DRIVE.tokenClient){ try{ DRIVE.tokenClient.requestAccessToken({prompt:''}); }catch(e){ setSyncStatus('signin'); } } }
 
 function initDriveClient(){
   if(!driveEnabled()) return false;
@@ -670,8 +682,8 @@ function initDriveClient(){
   if(!DRIVE.tokenClient){
     DRIVE.tokenClient=google.accounts.oauth2.initTokenClient({
       client_id:CONFIG.CLIENT_ID, scope:DRIVE.scope,
-      callback:async(resp)=>{ if(resp&&resp.access_token){ DRIVE.token=resp.access_token; setSyncStatus('sync'); await drivePull(); setSyncStatus('done'); }
-        else { setSyncStatus('error'); } },
+      callback:async(resp)=>{ if(resp&&resp.access_token){ DRIVE.token=resp.access_token; DRIVE.expiry=Date.now()+((resp.expires_in?resp.expires_in*1000:3600000)); saveDriveToken(); setSyncStatus('sync'); await drivePull(); setSyncStatus('done'); }
+        else { setSyncStatus('signin'); } },
       error_callback:(err)=>{ console.warn('GIS', err); setSyncStatus('signin'); }
     });
   }
@@ -685,7 +697,7 @@ function driveSignIn(){
 
 async function driveApi(url,opts){
   const r=await fetch(url,{...opts, headers:{ Authorization:'Bearer '+DRIVE.token, ...(opts&&opts.headers||{}) }});
-  if(r.status===401){ DRIVE.token=null; setSyncStatus('signin'); throw new Error('drive 401'); }
+  if(r.status===401){ clearDriveToken(); setSyncStatus('signin'); driveSilent(); throw new Error('drive 401'); }
   if(!r.ok) throw new Error('drive '+r.status);
   return r;
 }
@@ -865,7 +877,10 @@ function packBlocks(blocks){ // assigns .col .cols (layout) and .conflict (true 
 
 async function weekStats(){const tasks=await getTasks(),log=await getLog();const ws=startOfWeek(today);const days=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);days.push(key(d));}
   const elapsed=Math.min(7,Math.round((today-ws)/864e5)+1);const pace=elapsed/7;const byPrio={};PRIOS.forEach(p=>byPrio[p.id]={done:0,target:0});
-  tasks.forEach(t=>{if(!byPrio[t.prio])return;byPrio[t.prio].target+=t.target;days.forEach(dk=>{if(log[dk]&&log[dk][t.id])byPrio[t.prio].done++;});});return {byPrio,pace};}
+  tasks.forEach(t=>{if(!byPrio[t.prio])return;byPrio[t.prio].target+=t.target;days.forEach(dk=>{if(log[dk]&&log[dk][t.id])byPrio[t.prio].done++;});});
+  // відмічені події з категорією теж рухають прогрес своєї категорії (справи — ні)
+  const events=await getEvents();days.forEach(dk=>{(events[dk]||[]).forEach(e=>{if(e.done&&byPrio[e.cat])byPrio[e.cat].done++;});});
+  return {byPrio,pace};}
 
 /* ===== TODAY (any day, via viewDay) ===== */
 let todayMode='grid';
@@ -1105,7 +1120,7 @@ async function renderCal(){
 async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.getDate()} ${MON[d.getMonth()]}`;$('#drawerSub').textContent=DOWfull[d.getDay()];
   const ev=await getEvents();const cs=ev[k]||[];const aff=(await affairsByDate())[k]||[];const plan=(await effectivePlan(k)).filter(t=>t.start).sort(byTime);
   $('#drawerBody').innerHTML=`
-    ${cs.length?'<p class="eyebrow" style="margin-top:0">Важливі події</p>'+cs.map(e=>`<div class="ev-row" data-eid="${e.id}"><span class="et">${e.t||'—'}${e.end?'–'+e.end:''}</span><span class="ex">${e.important?'★ ':''}${esc(e.title)}</span><button class="erm" data-rm="${e.id}">🗑</button></div>`).join(''):''}
+    ${cs.length?'<p class="eyebrow" style="margin-top:0">Важливі події</p>'+cs.map(e=>`<div class="ev-row ev ${e.done?'done':''}" data-eid="${e.id}"><span class="echk" data-echk="${e.id}" style="border-color:${P[e.cat]?P[e.cat].c:'var(--line)'}">${e.done?'✓':''}</span><span class="et">${e.t||'—'}${e.end?'–'+e.end:''}</span><span class="ex">${e.important?'★ ':''}${esc(e.title)}</span><button class="erm" data-rm="${e.id}">🗑</button></div>`).join(''):''}
     ${aff.length?'<p class="eyebrow">Зі «Справ» на цей день</p>'+aff.map(x=>`<div class="ev-row aff ${x.done?'done':''}" data-affid="${x.id}" data-affsid="${x.sid}"><span class="achk">${x.done?'✓':''}</span><span class="ex">${esc(x.title)}${x.start?` <span style="font-family:Oswald;font-size:11px;color:var(--slate)">${x.start}${x.end?'–'+x.end:''}</span>`:''}<br><span style="font-size:11px;color:var(--muted)">${esc(x.sec)}</span></span></div>`).join(''):''}
     <div class="dform" style="background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:6px">
       <div class="two"><div><label>Від</label><input type="time" id="evTime"></div><div><label>До</label><input type="time" id="evEnd"></div></div>
@@ -1117,6 +1132,7 @@ async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.ge
     ${plan.map(t=>`<div class="ev-row plan" data-tid="${t.id}" data-torigin="${t.origin||''}"><span class="et">${t.start}${t.end?'–'+t.end:''}</span><span class="ex">${esc(t.title)}${t.notes?`<br><span style="font-size:11px;color:var(--muted)">📝 ${esc(t.notes)}</span>`:''}</span></div>`).join('')||'<p class="note-soft">Завдання з часом з’являться тут.</p>'}`;
   $('#drawerBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const e=await getEvents();e[k]=(e[k]||[]).filter(x=>x.id!==b.dataset.rm);if(!e[k].length)delete e[k];await setEvents(e);openDay(k);renderCal();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row[data-eid]').forEach(r=>r.querySelector('.ex').onclick=()=>openEventEditor(k,r.dataset.eid));
+  $('#drawerBody').querySelectorAll('[data-echk]').forEach(c=>c.onclick=async()=>{const e=await getEvents();const it=(e[k]||[]).find(x=>x.id===c.dataset.echk);if(it){it.done=!it.done;await setEvents(e);}openDay(k);renderCal();renderToday();renderPrioCards();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row.aff').forEach(r=>r.querySelector('.achk').onclick=async()=>{const a2=await getAffairs();const it=(a2[r.dataset.affsid]?.items||[]).find(x=>x.id===r.dataset.affid);if(it){it.done=!it.done;await setAffairs(a2);}openDay(k);renderCal();renderToday();renderAffairs();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row.plan').forEach(r=>r.querySelector('.ex').onclick=()=>openTaskEditor(r.dataset.tid,{scope:'day',dk:k,origin:r.dataset.torigin}));
   $('#evAdd').onclick=async()=>{const t=$('#evTitle').value.trim();if(!t)return $('#evTitle').focus();const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:$('#evTime').value,end:$('#evEnd').value,title:t,cat:$('#evCat').value,important:$('#evStar').checked});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};
@@ -1413,9 +1429,14 @@ function setupSync(){
   if(!driveEnabled()) return;
   const b=document.getElementById('syncBtn');
   if(b){ b.hidden=false; setSyncStatus('signin'); b.onclick=driveSignIn; }
-  // Лише підготувати клієнт (без авто-входу) — авторизація відбувається по кліку кнопки.
+  // 1) кешований токен ще живий → одразу синхронізуємось, без вікна
+  if(loadDriveToken()){ setSyncStatus('done'); }
   let tries=0;
-  const tick=setInterval(()=>{ if(initDriveClient()||++tries>40) clearInterval(tick); },250);
+  const tick=setInterval(()=>{ if(initDriveClient()){ clearInterval(tick);
+      if(driveReady()){ drivePull(); }              // маємо живий токен
+      else if(driveGrantedBefore()){ driveSilent(); } // входила раніше → тихо поновити
+      // інакше: чекаємо явного кліку «Увійти»
+    } else if(++tries>40){ clearInterval(tick); } },250);
 }
 
 (async function(){await loadState();await seedOnce();await renderAll();setupSync();})();
