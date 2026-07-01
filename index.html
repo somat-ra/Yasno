@@ -1098,7 +1098,8 @@ async function renderCal(){
       let gh='';for(let h=GS;h<=GE;h++)gh+='<div class="gh"></div>';
       return `<div class="wkcol ${sameDay(d,today)?'today':''}" data-k="${dk}">${gh}${bh}${sameDay(d,new Date())?`<div class="nowline" style="${nowLineStyle(d).replace(/top:(\d+(\.\d+)?)px/,(m,p)=>'top:'+(parseFloat(p)/TLH*PXH)+'px')}"></div>`:''}</div>`;}).join('');
     body.innerHTML=`<div class="wkgrid-wrap">${head}${adRow}<div class="wkbody" style="grid-template-columns:${cols}"><div class="gutcol">${hgut}</div>${cells}</div></div>`;
-    body.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>openDay(el.dataset.k));
+    body.querySelectorAll('.wh[data-k],.adcell[data-k]').forEach(el=>el.onclick=()=>openDay(el.dataset.k));
+    body.querySelectorAll('.wkcol[data-k]').forEach(el=>el.onclick=e=>{const rect=el.getBoundingClientRect();const y=e.clientY-rect.top;let m=Math.round((GS*60+y/PXH*60)/30)*30;m=Math.max(GS*60,Math.min(GE*60,m));openDay(el.dataset.k,fmtMin(m));});
   } else if(viewMode==='month'){
     title.textContent=`${MONn[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
     const first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1);const s=startOfWeek(first);let cells='';
@@ -1120,10 +1121,11 @@ async function renderCal(){
     body.querySelectorAll('[data-m]').forEach(el=>el.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),+el.dataset.m,1);viewMode='month';renderCal();});
   }
 }
-async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.getDate()} ${MON[d.getMonth()]}`;$('#drawerSub').textContent=DOWfull[d.getDay()];
+let evClipboard=null; try{evClipboard=JSON.parse(localStorage.getItem('yo:evClip')||'null');}catch(e){}
+async function openDay(k,prefillTime){const d=parse(k);$('#drawerTitle').textContent=`${d.getDate()} ${MON[d.getMonth()]}`;$('#drawerSub').textContent=DOWfull[d.getDay()];
   const ev=await getEvents();const cs=ev[k]||[];const aff=(await affairsByDate())[k]||[];const plan=(await effectivePlan(k)).filter(t=>t.start).sort(byTime);
   $('#drawerBody').innerHTML=`
-    ${cs.length?'<p class="eyebrow" style="margin-top:0">Важливі події</p>'+cs.map(e=>`<div class="ev-row ev ${e.done?'done':''}" data-eid="${e.id}"><span class="echk" data-echk="${e.id}" style="border-color:${P[e.cat]?P[e.cat].c:'var(--line)'}">${e.done?'✓':''}</span><span class="et">${e.t||'—'}${e.end?'–'+e.end:''}</span><span class="ex">${e.important?'★ ':''}${esc(e.title)}</span><button class="erm" data-rm="${e.id}">🗑</button></div>`).join(''):''}
+    ${cs.length?'<p class="eyebrow" style="margin-top:0">Важливі події</p>'+cs.map(e=>`<div class="ev-row ev ${e.done?'done':''}" data-eid="${e.id}"><span class="echk" data-echk="${e.id}" style="border-color:${P[e.cat]?P[e.cat].c:'var(--line)'}">${e.done?'✓':''}</span><span class="et">${e.t||'—'}${e.end?'–'+e.end:''}</span><span class="ex">${e.important?'★ ':''}${esc(e.title)}</span><button class="erm" data-cp="${e.id}" title="Копіювати">⧉</button><button class="erm" data-rm="${e.id}" title="Видалити">🗑</button></div>`).join(''):''}
     ${aff.length?'<p class="eyebrow">Зі «Справ» на цей день</p>'+aff.map(x=>`<div class="ev-row aff ${x.done?'done':''}" data-affid="${x.id}" data-affsid="${x.sid}"><span class="achk">${x.done?'✓':''}</span><span class="ex">${esc(x.title)}${x.start?` <span style="font-family:Oswald;font-size:11px;color:var(--slate)">${x.start}${x.end?'–'+x.end:''}</span>`:''}<br><span style="font-size:11px;color:var(--muted)">${esc(x.sec)}</span></span></div>`).join(''):''}
     <div class="dform" style="background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:6px">
       <div class="two"><div><label>Від</label><input type="time" id="evTime"></div><div><label>До</label><input type="time" id="evEnd"></div></div>
@@ -1131,6 +1133,7 @@ async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.ge
       <label>Категорія</label><select id="evCat">${PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('')}<option value="admin">Інше / адмін</option></select>
       <label class="star-toggle"><input type="checkbox" id="evStar"> Важлива дата (★)</label>
       <button class="btn" id="evAdd" style="width:100%;margin-top:12px">Додати подію</button></div>
+    ${evClipboard?`<button class="btn ghost" id="evPaste" style="width:100%;margin-top:8px">📋 Вставити «${esc(evClipboard.title)}»${evClipboard.t?' о '+evClipboard.t:''}</button>`:''}
     <p class="eyebrow">План дня <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(клік — редагувати лише цей день)</span></p>
     ${plan.map(t=>`<div class="ev-row plan" data-tid="${t.id}" data-torigin="${t.origin||''}"><span class="et">${t.start}${t.end?'–'+t.end:''}</span><span class="ex">${esc(t.title)}${t.notes?`<br><span style="font-size:11px;color:var(--muted)">📝 ${esc(t.notes)}</span>`:''}</span></div>`).join('')||'<p class="note-soft">Завдання з часом з’являться тут.</p>'}`;
   $('#drawerBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const e=await getEvents();e[k]=(e[k]||[]).filter(x=>x.id!==b.dataset.rm);if(!e[k].length)delete e[k];await setEvents(e);openDay(k);renderCal();fillNextPill();});
@@ -1139,6 +1142,12 @@ async function openDay(k){const d=parse(k);$('#drawerTitle').textContent=`${d.ge
   $('#drawerBody').querySelectorAll('.ev-row.aff').forEach(r=>r.querySelector('.achk').onclick=async()=>{const a2=await getAffairs();const it=(a2[r.dataset.affsid]?.items||[]).find(x=>x.id===r.dataset.affid);if(it){it.done=!it.done;await setAffairs(a2);}openDay(k);renderCal();renderToday();renderAffairs();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row.plan').forEach(r=>r.querySelector('.ex').onclick=()=>openTaskEditor(r.dataset.tid,{scope:'day',dk:k,origin:r.dataset.torigin}));
   $('#evAdd').onclick=async()=>{const t=$('#evTitle').value.trim();if(!t)return $('#evTitle').focus();const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:$('#evTime').value,end:$('#evEnd').value,title:t,cat:$('#evCat').value,important:$('#evStar').checked});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};
+  // копіювати подію в буфер
+  $('#drawerBody').querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const e=await getEvents();const it=(e[k]||[]).find(x=>x.id===b.dataset.cp);if(it){evClipboard={t:it.t||'',end:it.end||'',title:it.title,cat:it.cat,important:!!it.important};try{localStorage.setItem('yo:evClip',JSON.stringify(evClipboard));}catch(_){}openDay(k);}});
+  // вставити подію з буфера в цей день
+  {const pb=$('#evPaste');if(pb)pb.onclick=async()=>{if(!evClipboard)return;const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:evClipboard.t||'',end:evClipboard.end||'',title:evClipboard.title,cat:evClipboard.cat,important:!!evClipboard.important});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};}
+  // якщо клікнули по конкретному часу в сітці — підставити його
+  if(prefillTime){const et=$('#evTime');if(et)et.value=prefillTime;const ti=$('#evTitle');if(ti)setTimeout(()=>ti.focus(),50);}
   openDrawer();}
 function openDrawer(){$('#scrim').classList.add('on');$('#drawer').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');}
 function closeDrawer(){$('#scrim').classList.remove('on');$('#drawer').classList.remove('on');$('#drawer').setAttribute('aria-hidden','true');}
