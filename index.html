@@ -263,6 +263,28 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .fc-bar.over .track>span{background:var(--rose)}
 .fc-left{font-size:11px;font-weight:700;white-space:nowrap}
 .fc-left.ok{color:var(--ok)}.fc-left.under{color:#a06318}.fc-left.over{color:#a44b56}
+.fc-ringcol{display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto}
+.fc-pace{font-size:11px;color:var(--muted);text-align:center;max-width:150px;line-height:1.45}
+.fc-adv{margin-top:14px;background:var(--mist);border-radius:10px;padding:12px 14px}
+.fc-adv .tip{font-size:13px;margin:0}
+.fc-sug{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 0}
+.fc-sug+.fc-sug{border-top:1px dashed var(--line)}
+.fc-sug .nm{flex:1;min-width:0}.fc-sug .gv{color:var(--muted);font-size:12px;white-space:nowrap}
+.fc-sug button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 9px;cursor:pointer;font-size:12px;white-space:nowrap}
+.fc-sug button:hover{border-color:var(--spruce2)}
+.fc-rlink{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--spruce2);cursor:pointer;background:none;border:0;padding:0}
+.fc-week{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+.fc-week .wrap{display:flex;gap:8px;align-items:flex-end;height:104px;position:relative}
+.fc-week .norm{position:absolute;left:0;right:0;bottom:75%;border-top:2px dashed rgba(46,62,58,.3);pointer-events:none}
+.fc-week .day{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;cursor:pointer;border-radius:6px}
+.fc-week .day:hover{background:var(--mist)}
+.fc-week .cols{display:flex;gap:3px;align-items:flex-end;flex:1;width:100%;justify-content:center}
+.fc-week .bk{width:16px;border-radius:4px 4px 0 0;background:var(--ok);min-height:2px}
+.fc-week .bk.under{background:var(--under)}.fc-week .bk.over{background:var(--rose)}
+.fc-week .bp{width:7px;border-radius:3px 3px 0 0;background:var(--spruce2);opacity:.65;min-height:2px}
+.fc-week .dl{font-size:10.5px;color:var(--muted);margin-top:4px}
+.fc-week .day.cur .dl{font-weight:800;color:var(--spruce2)}
+.fc-week .lg{font-size:10.5px;color:var(--muted);margin-top:6px}
 .fc-st{font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--mist2);color:var(--muted);white-space:nowrap}
 .fc-st.over{background:#f6e3e5;color:#a44b56}.fc-st.under{background:#f7ead8;color:#a06318}.fc-st.ok{background:#e2efe9;color:#2E6E5A}
 .fc-sum{margin-top:12px;font-size:13.5px}
@@ -587,8 +609,10 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
           <button class="btn sm" id="fcNewSave">Зберегти і додати</button>
         </div>
         <div id="fcItems"></div>
-        <div class="fc-dash"><div class="fc-ring" id="fcRing"></div><div class="fc-bars" id="fcTotals"></div></div>
+        <div class="fc-dash"><div class="fc-ringcol"><div class="fc-ring" id="fcRing"></div><div class="fc-pace" id="fcPace"></div></div><div class="fc-bars" id="fcTotals"></div></div>
+        <div class="fc-adv" id="fcAdvice" style="display:none"></div>
         <div class="fc-sum" id="fcSum"></div>
+        <div class="fc-week"><p class="eyebrow" style="margin:0 0 8px">Тиждень</p><div class="wrap" id="fcWeek"></div><div class="lg">широкий стовпчик — калорії · вузький — білок · пунктир — норма · тап по дню відкриває його</div></div>
         <details class="fc-prof">
           <summary>Мій профіль і денні норми</summary>
           <div class="grid">
@@ -1497,13 +1521,29 @@ async function renderFood(){
   const stK=items.length?fcStatus('kcal',kcalV,T):null;
   const ringCol=stK==='over'?'var(--rose)':stK==='ok'?'var(--ok)':'var(--under)';
   const C=2*Math.PI*56;const rpct=Math.min(1,T.kcal?kcalV/T.kcal:0);
+  // темп дня: де «маєш бути» о цій годині (вікно їжі 8:00–21:00), риска на кільці — лише сьогодні
+  const isToday=fcDate===key(today);
+  const now=new Date();const expFrac=Math.max(0,Math.min(1,(now.getHours()+now.getMinutes()/60-8)/13));
+  let tick='';
+  if(isToday&&items.length){
+    const a=expFrac*2*Math.PI;
+    tick=`<line x1="${(66+49*Math.cos(a)).toFixed(1)}" y1="${(66+49*Math.sin(a)).toFixed(1)}" x2="${(66+63*Math.cos(a)).toFixed(1)}" y2="${(66+63*Math.sin(a)).toFixed(1)}" stroke="rgba(46,62,58,.5)" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
   $('#fcRing').innerHTML=`<svg width="132" height="132" viewBox="0 0 132 132">
     <circle class="c-bg" cx="66" cy="66" r="56" fill="none" stroke-width="11"/>
-    <circle class="c-val" cx="66" cy="66" r="56" fill="none" stroke="${ringCol}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(rpct*C).toFixed(1)} ${C.toFixed(1)}"/></svg>
+    <circle class="c-val" cx="66" cy="66" r="56" fill="none" stroke="${ringCol}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(rpct*C).toFixed(1)} ${C.toFixed(1)}"/>${tick}</svg>
     <div class="mid">${rem>=0
       ?`<b>${rem}</b><span>лишилось ккал</span>`
       :`<b style="color:#a44b56">+${-rem}</b><span>понад норму</span>`}
       <span>${kcalV} з ${T.kcal}</span></div>`;
+  let paceTxt='';
+  if(isToday&&items.length){
+    const diff=kcalV-expFrac*T.kcal;
+    const p=diff<-200?'трохи відстаєш від темпу':diff>200?'ти попереду темпу':'у темпі дня';
+    const f=rem<=80?'день майже закритий':rem<300?`залишок ≈ легкий перекус`:rem<650?`залишок ≈ вечеря`:`залишок ≈ повний прийом + перекус`;
+    paceTxt=`${p} (риска)<br>${f}`;
+  }
+  $('#fcPace').innerHTML=paceTxt;
   // бари БЖВ + клітковина: позначки норми на треку і «скільки ще»
   const rows=[
     {m:'prot',lbl:'Білки',v:r1(sum.p),tgt:`≥ ${T.prot}`,lo:T.prot,hi:T.protMax,scale:T.protMax*1.1},
@@ -1529,6 +1569,71 @@ async function renderFood(){
   $('#fcSum').innerHTML=!items.length?'':(over.length||under.length)
     ?`${over.length?`<span style="color:#a44b56">⚠ Перебір: ${over.join(', ')}</span>`:''}${over.length&&under.length?' · ':''}${under.length?`<span style="color:#a06318">Недобір: ${under.join(', ')}</span>`:''}`
     :'<span style="color:var(--ok)">✓ Усе в межах норми</span>';
+  // «чим добрати»: продукти під дефіцит + рецепт + закупівлі
+  const adv=$('#fcAdvice');
+  const gaps=[
+    {key:'prot',lbl:'білка',gap:T.prot-sum.p,rel:(T.prot-sum.p)/T.prot,per:p=>p.p,unit:'г білка',cap:250},
+    {key:'fiber',lbl:'клітковини',gap:T.fiber-sum.fb,rel:(T.fiber-sum.fb)/T.fiber,per:p=>p.fb||0,unit:'г клітковини',cap:300},
+    {key:'carb',lbl:'вуглеводів',gap:T.carb[0]-sum.c,rel:(T.carb[0]-sum.c)/T.carb[0],per:p=>p.c,unit:'г вуглеводів',cap:250}
+  ].filter(g=>g.gap>1).sort((a,b)=>b.rel-a.rel);
+  const POOL={prot:['Сир кисломолочний 5%','Йогурт грецький','Куряче філе відварне','Яйце варене','Тунець у власному соку','Сочевиця варена'],
+    fiber:['Малина','Квасоля варена','Броколі варена','Яблуко','Хліб цільнозерновий','Груша'],
+    carb:['Гречка варена','Вівсянка на молоці','Банан','Картопля печена','Хліб цільнозерновий']};
+  const RKEY={prot:['яйц','кур','фарш','риб','сочевиц','сир'],fiber:['сочевиц','квасол','овоч','кабач','капуст','шпинат'],carb:['гречк','овес','картопл','рис']};
+  if(!items.length){adv.style.display='none';adv.innerHTML='';}
+  else if(rem<-100){
+    adv.style.display='block';
+    adv.innerHTML='<p class="tip">Калорії вже понад норму — якщо голодна, обирай найлегше: свіжі овочі, кефір, ягоди.</p>';
+  }else if(!gaps.length&&rem<=150){
+    adv.style.display='block';
+    adv.innerHTML='<p class="tip" style="color:var(--ok)">✓ День зібраний: і калорії, і Б/Ж/В у нормі.</p>';
+  }else{
+    adv.style.display='block';
+    const main=gaps.length?gaps.slice(0,2):[{key:'prot',lbl:'калорій',gap:Math.max(10,rem/8),per:p=>p.p,unit:'г білка',cap:200}];
+    const hour=now.getHours();
+    const mealTag=hour>=17?'вечеря':hour>=11?'обід':'сніданок';
+    let html=`<p class="tip"><b>Чим добрати:</b> найбільше бракує ${gaps.length?gaps.slice(0,2).map(g=>g.lbl).join(' і '):'калорій'}${hour>=17?' — заклади це у вечерю':''}.</p>`;
+    const seen=new Set();
+    main.forEach(g=>{
+      let cnt=0;
+      for(const nm of POOL[g.key]||[]){
+        if(cnt>=2)break;if(seen.has(nm))continue;
+        const p=fcAllProds().find(x=>x.n===nm);if(!p)continue;
+        const per=g.per(p);if(!per)continue;
+        const gr=Math.round(Math.min(g.cap,Math.max(40,g.gap/per*100))/10)*10;
+        const gives=Math.round(per*gr/100*10)/10;
+        seen.add(nm);cnt++;
+        html+=`<div class="fc-sug" data-n="${esc(p.n)}" data-g="${gr}"><span class="nm">${esc(p.n)} — <b>${gr} г</b> <span class="gv">(+${gives} ${g.unit} · ${Math.round(p.k*gr/100)} ккал)</span></span><button class="add1">+ у день</button><button class="shop1" title="У закупівлі">🛒</button></div>`;
+      }
+    });
+    const kw=RKEY[main[0].key]||[];
+    const rec=RECIPES.find(r=>r.tag===mealTag&&kw.some(k2=>r.prod.toLowerCase().includes(k2)))||RECIPES.find(r=>kw.some(k2=>r.prod.toLowerCase().includes(k2)));
+    if(rec)html+=`<button class="fc-rlink" data-r="${esc(rec.n)}">Рецепт під це: «${esc(rec.n)}» ↓</button>`;
+    adv.innerHTML=html;
+    adv.querySelectorAll('.add1').forEach(b=>b.onclick=async()=>{const dd=b.parentElement;const p=fcAllProds().find(x=>x.n===dd.dataset.n);if(p)await fcPush(p,parseFloat(dd.dataset.g));});
+    adv.querySelectorAll('.shop1').forEach(b=>b.onclick=async()=>{const nm=b.parentElement.dataset.n;const c=await store.get('shopCustom',[]);if(!c.includes(nm))c.push(nm);await store.set('shopCustom',c);b.textContent='✓';await renderShop();});
+    const rl=adv.querySelector('.fc-rlink');
+    if(rl)rl.onclick=()=>{
+      $$('#recipeFilter .fb').forEach(x=>x.setAttribute('aria-pressed',x.dataset.f==='all'));renderRecipes('all');
+      const card=[...document.querySelectorAll('#recipeList .recipe')].find(c=>c.querySelector('.rname').textContent===rl.dataset.r);
+      if(card){card.classList.add('open');card.scrollIntoView({behavior:'smooth',block:'center'});}};
+  }
+  // тижневий графік: ккал + білок у % від норми, пунктир = 100%
+  const wkEl=$('#fcWeek');
+  if(wkEl){
+    const wk=[];for(let i=6;i>=0;i--){const dd=parse(fcDate);dd.setDate(dd.getDate()-i);wk.push(key(dd));}
+    wkEl.innerHTML='<div class="norm"></div>'+wk.map(k2=>{
+      const its=log[k2]||[];
+      const s=its.reduce((a,x)=>({k:a.k+x.k,p:a.p+x.p}),{k:0,p:0});
+      const hh=x=>Math.min(100,x*75).toFixed(1);
+      const st=its.length?fcStatus('kcal',s.k,T):'';
+      const dd=parse(k2);
+      return `<div class="day ${k2===fcDate?'cur':''}" data-k="${k2}" title="${Math.round(s.k)} ккал · білок ${Math.round(s.p)} г">
+        <div class="cols"><span class="bk ${st}" style="height:${hh(T.kcal?s.k/T.kcal:0)}%"></span><span class="bp" style="height:${hh(T.prot?s.p/T.prot:0)}%"></span></div>
+        <span class="dl">${DOW[dd.getDay()]}</span></div>`;
+    }).join('');
+    wkEl.querySelectorAll('.day').forEach(el2=>el2.onclick=()=>{fcDate=el2.dataset.k;renderFood();});
+  }
   // профіль у форму
   $('#fpAge').value=pr.age;$('#fpH').value=pr.h;$('#fpW').value=pr.w;$('#fpAct').value=String(pr.act);$('#fpMode').value=pr.mode;
 }
