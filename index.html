@@ -760,6 +760,7 @@ async function loadState(){
   state={};
   for(const k of STATE_KEYS){const v=await backend.get(k);if(v!==undefined)state[k]=v;}
   const u=await backend.get('updatedAt');if(u!==undefined)state.updatedAt=u;
+  const ku=await backend.get('_keyU');if(ku)state._keyU=ku; // мітки часу по ключах — для мерджу конфліктів
   return state;
 }
 
@@ -770,7 +771,7 @@ async function saveState(){
   state.updatedAt=Date.now();
   await backend.set('updatedAt',state.updatedAt);
   const snapshot=JSON.stringify(state); // те, що йде у yasno-state.json
-  if(driveReady()) drivePush(snapshot); // пуш у Drive (fire-and-forget)
+  if(driveReady()) drivePush(); // пуш у Drive (fire-and-forget, з пре-мерджем)
   return snapshot;
 }
 function scheduleSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveState,300);}
@@ -842,7 +843,26 @@ async function driveUpload(snapshotStr){
     headers:{ 'Content-Type':`multipart/related; boundary=${boundary}` }, body });
   const j=await r.json(); if(j.id) DRIVE.fileId=j.id; return j;
 }
-// Підтягнути стан із Drive і змерджити за updatedAt; якщо файлу нема — створити з локального.
+// Мердж віддаленого стану в локальний ПО КЛЮЧАХ: для кожного ключа виграє новіша мітка
+// (_keyU). Для старих знімків без _keyU — фолбек на загальний updatedAt.
+// Повертає {applied: чи взяли щось із remote, pushNeeded: чи є локальне новіше за remote}.
+async function mergeRemote(remote){
+  const rU=(remote&&remote.updatedAt)||0, lU=state.updatedAt||0;
+  const rK=(remote&&remote._keyU)||{}, lK=state._keyU||{};
+  let applied=false, pushNeeded=false;
+  for(const k of STATE_KEYS){
+    const inR=remote&&(k in remote), inL=(k in state);
+    const rt=rK[k]!==undefined?rK[k]:(inR?rU:0);
+    const lt=lK[k]!==undefined?lK[k]:(inL?lU:0);
+    if(inR&&rt>lt){ state[k]=remote[k]; lK[k]=rt; await backend.set(k,remote[k]); applied=true; }
+    else if(inL&&lt>rt){ pushNeeded=true; }
+  }
+  state._keyU=lK; await backend.set('_keyU',lK);
+  const newU=Math.max(rU,lU);
+  if(newU!==state.updatedAt){ state.updatedAt=newU; await backend.set('updatedAt',newU); }
+  return {applied,pushNeeded};
+}
+// Підтягнути стан із Drive і змерджити по ключах; якщо файлу нема — створити з локального.
 async function drivePull(){
   if(!driveReady()) return;
   try{
@@ -850,23 +870,29 @@ async function drivePull(){
     if(!f){ await driveUpload(JSON.stringify(state)); return; }
     DRIVE.fileId=f.id;
     const remote=await driveDownload(f.id);
-    const localU=state.updatedAt||0, remoteU=(remote&&remote.updatedAt)||0;
-    if(remoteU>localU){
-      for(const k of STATE_KEYS){ if(k in remote){ state[k]=remote[k]; await backend.set(k,remote[k]); } }
-      state.updatedAt=remoteU; await backend.set('updatedAt',remoteU);
-      customCats=await getCats(); applyCats();
-      await renderAll();
-    } else if(localU>remoteU){
-      await driveUpload(JSON.stringify(state));
-    }
+    const res=await mergeRemote(remote);
+    if(res.applied){ customCats=await getCats(); applyCats(); await renderAll(); }
+    if(res.pushNeeded){ await driveUpload(JSON.stringify(state)); }
   }catch(e){ console.warn('drivePull', e); }
 }
 let _pushTimer=null;
-function drivePush(snapshotStr){
+function drivePush(){
   if(!driveReady()) return;
   clearTimeout(_pushTimer);
-  _pushTimer=setTimeout(async()=>{ try{ setSyncStatus('sync'); await driveUpload(snapshotStr||JSON.stringify(state)); setSyncStatus('done'); }
-    catch(e){ console.warn('drivePush', e); setSyncStatus('error'); } }, 800);
+  _pushTimer=setTimeout(async()=>{ try{
+    setSyncStatus('sync');
+    // перед пушем — змерджити з remote, щоб не перетерти новіші зміни з іншого пристрою
+    try{
+      if(!DRIVE.fileId){ const f=await driveFindFile(); if(f)DRIVE.fileId=f.id; }
+      if(DRIVE.fileId){
+        const remote=await driveDownload(DRIVE.fileId);
+        const res=await mergeRemote(remote);
+        if(res.applied){ customCats=await getCats(); applyCats(); await renderAll(); }
+      }
+    }catch(e){ console.warn('pre-push merge', e); }
+    await driveUpload(JSON.stringify(state));
+    setSyncStatus('done');
+  }catch(e){ console.warn('drivePush', e); setSyncStatus('error'); } }, 800);
 }
 function setSyncStatus(s){
   const b=document.getElementById('syncBtn'); if(!b) return;
@@ -877,7 +903,11 @@ function setSyncStatus(s){
 // Сумісний шар: усі наявні виклики йдуть через store.get/set без змін.
 const store={
   async get(k,def){return (k in state)?state[k]:def;},
-  async set(k,v){state[k]=v;await backend.set(k,v);scheduleSave();}
+  async set(k,v){
+    state[k]=v;await backend.set(k,v);
+    state._keyU=state._keyU||{};state._keyU[k]=Date.now();await backend.set('_keyU',state._keyU); // мітка для мерджу
+    scheduleSave();
+  }
 };
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1937,6 +1967,12 @@ function setupSync(){
       else if(driveGrantedBefore()){ driveSilent(); } // входила раніше → тихо поновити
       // інакше: чекаємо явного кліку «Увійти»
     } else if(++tries>40){ clearInterval(tick); } },250);
+  // повернення на вкладку/застосунок → підтягнути свіже з Drive (або тихо поновити токен)
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden)return;
+    if(driveReady())drivePull(); else if(driveGrantedBefore())driveSilent(); });
+  // фоновий пул кожні 5 хв — щоб телефон і ноут не розходились протягом дня
+  setInterval(()=>{ if(document.hidden)return;
+    if(driveReady())drivePull(); else if(driveGrantedBefore())driveSilent(); },5*60*1000);
 }
 
 (async function(){await loadState();customCats=await getCats();applyCats();
