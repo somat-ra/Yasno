@@ -244,12 +244,25 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .fc-item .nm{flex:1;min-width:0}.fc-item .kc{font-weight:700;white-space:nowrap}
 .fc-item .mac{color:var(--muted);font-size:12px;white-space:nowrap}
 .fc-item .del{border:0;background:transparent;color:#ccc;cursor:pointer;font-size:14px}.fc-item .del:hover{color:var(--rose)}
-.fc-bars{margin-top:14px;display:grid;gap:9px}
+.fc-item .ed{border:0;background:transparent;color:#ccc;cursor:pointer;font-size:13px}.fc-item .ed:hover{color:var(--spruce2)}
+.fc-item .ok2{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 10px;cursor:pointer;font-size:12.5px;font-weight:600}
+.fc-dash{margin-top:16px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.fc-ring{position:relative;width:132px;height:132px;flex:0 0 auto}
+.fc-ring svg{transform:rotate(-90deg);display:block}
+.fc-ring .c-bg{stroke:var(--mist2)}
+.fc-ring .c-val{transition:stroke-dasharray .3s}
+.fc-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px}
+.fc-ring .mid b{font-family:'Nunito';font-size:21px;line-height:1.05}
+.fc-ring .mid span{font-size:10px;color:var(--muted)}
+.fc-bars{flex:1;min-width:230px;display:grid;gap:11px}
 .fc-bar .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;margin-bottom:3px}
-.fc-bar .track{height:9px;border-radius:999px;background:var(--mist2);overflow:hidden}
+.fc-bar .track{height:12px;border-radius:999px;background:var(--mist2);position:relative}
 .fc-bar .track>span{display:block;height:100%;border-radius:999px;background:var(--ok);transition:.2s}
+.fc-bar .track .mark{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:2px;background:rgba(46,62,58,.35)}
 .fc-bar.under .track>span{background:var(--under)}
 .fc-bar.over .track>span{background:var(--rose)}
+.fc-left{font-size:11px;font-weight:700;white-space:nowrap}
+.fc-left.ok{color:var(--ok)}.fc-left.under{color:#a06318}.fc-left.over{color:#a44b56}
 .fc-st{font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--mist2);color:var(--muted);white-space:nowrap}
 .fc-st.over{background:#f6e3e5;color:#a44b56}.fc-st.under{background:#f7ead8;color:#a06318}.fc-st.ok{background:#e2efe9;color:#2E6E5A}
 .fc-sum{margin-top:12px;font-size:13.5px}
@@ -574,7 +587,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
           <button class="btn sm" id="fcNewSave">Зберегти і додати</button>
         </div>
         <div id="fcItems"></div>
-        <div class="fc-bars" id="fcTotals"></div>
+        <div class="fc-dash"><div class="fc-ring" id="fcRing"></div><div class="fc-bars" id="fcTotals"></div></div>
         <div class="fc-sum" id="fcSum"></div>
         <details class="fc-prof">
           <summary>Мій профіль і денні норми</summary>
@@ -1454,29 +1467,65 @@ async function renderFood(){
   $('#fcDate').textContent=`${DOW[d.getDay()]}, ${d.getDate()} ${MON[d.getMonth()]}`+(fcDate===key(today)?' · сьогодні':'');
   $('#fcList').innerHTML=fcAllProds().map(p=>`<option value="${esc(p.n)}">`).join('');
   const log=await store.get('food',{});const items=log[fcDate]||[];
-  el.innerHTML=items.length?items.map(it=>`<div class="fc-item" data-id="${it.id}"><span class="nm">${esc(it.n)} <span class="mac">· ${it.g} г</span></span><span class="mac">Б ${it.p} · Ж ${it.f} · В ${it.c}</span><span class="kc">${it.k} ккал</span><button class="del" aria-label="Видалити">✕</button></div>`).join('')
+  el.innerHTML=items.length?items.map(it=>`<div class="fc-item" data-id="${it.id}"><span class="nm">${esc(it.n)} <span class="mac">· ${it.g} г</span></span><span class="mac">Б ${it.p} · Ж ${it.f} · В ${it.c}</span><span class="kc">${it.k} ккал</span><button class="ed" aria-label="Змінити грами">✎</button><button class="del" aria-label="Видалити">✕</button></div>`).join('')
     :'<p class="note-soft" style="margin:10px 0 0">Ще нічого не додано за цей день.</p>';
   el.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
     const lg=await store.get('food',{});lg[fcDate]=(lg[fcDate]||[]).filter(x=>x.id!==b.parentElement.dataset.id);
     if(!lg[fcDate].length)delete lg[fcDate];await store.set('food',lg);renderFood();});
+  el.querySelectorAll('.ed').forEach(b=>b.onclick=()=>{
+    const row=b.parentElement;const id=row.dataset.id;const it=items.find(x=>x.id===id);if(!it)return;
+    row.innerHTML=`<span class="nm">${esc(it.n)}</span><input class="fld" type="number" min="1" value="${it.g}" style="width:76px"><span class="mac">г</span><button class="ok2">Зберегти</button><button class="del" aria-label="Скасувати">✕</button>`;
+    const inp=row.querySelector('input');inp.focus();inp.select();
+    const rr=x=>Math.round(x*10)/10;
+    const save=async()=>{
+      const g=parseFloat(inp.value)||0;if(g<=0){renderFood();return;}
+      const base=fcAllProds().find(x=>x.n.toLowerCase()===it.n.toLowerCase());
+      const per=base?{k:base.k,p:base.p,f:base.f,c:base.c,fb:base.fb||0}
+        :{k:it.k/it.g*100,p:it.p/it.g*100,f:it.f/it.g*100,c:it.c/it.g*100,fb:(it.fb||0)/it.g*100};
+      const lg=await store.get('food',{});const t=(lg[fcDate]||[]).find(x=>x.id===id);
+      if(t){t.g=Math.round(g);t.k=Math.round(per.k*g/100);t.p=rr(per.p*g/100);t.f=rr(per.f*g/100);t.c=rr(per.c*g/100);t.fb=rr(per.fb*g/100);}
+      await store.set('food',lg);renderFood();};
+    row.querySelector('.ok2').onclick=save;
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape')renderFood();});
+    row.querySelector('.del').onclick=()=>renderFood();});
   // підсумки
   const sum=items.reduce((a,x)=>({k:a.k+x.k,p:a.p+x.p,f:a.f+x.f,c:a.c+x.c,fb:a.fb+(x.fb||0)}),{k:0,p:0,f:0,c:0,fb:0});
   const r1=x=>Math.round(x*10)/10;
   const pr=await fcProfile();const T=fcTargets(pr);
+  // кільце калорій
+  const kcalV=Math.round(sum.k);const rem=T.kcal-kcalV;
+  const stK=items.length?fcStatus('kcal',kcalV,T):null;
+  const ringCol=stK==='over'?'var(--rose)':stK==='ok'?'var(--ok)':'var(--under)';
+  const C=2*Math.PI*56;const rpct=Math.min(1,T.kcal?kcalV/T.kcal:0);
+  $('#fcRing').innerHTML=`<svg width="132" height="132" viewBox="0 0 132 132">
+    <circle class="c-bg" cx="66" cy="66" r="56" fill="none" stroke-width="11"/>
+    <circle class="c-val" cx="66" cy="66" r="56" fill="none" stroke="${ringCol}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(rpct*C).toFixed(1)} ${C.toFixed(1)}"/></svg>
+    <div class="mid">${rem>=0
+      ?`<b>${rem}</b><span>лишилось ккал</span>`
+      :`<b style="color:#a44b56">+${-rem}</b><span>понад норму</span>`}
+      <span>${kcalV} з ${T.kcal}</span></div>`;
+  // бари БЖВ + клітковина: позначки норми на треку і «скільки ще»
   const rows=[
-    {m:'kcal',lbl:'Калорії',v:Math.round(sum.k),u:'ккал',tgt:`≈ ${T.kcal}`,max:T.kcal},
-    {m:'prot',lbl:'Білки',v:r1(sum.p),u:'г',tgt:`≥ ${T.prot}`,max:T.prot},
-    {m:'fat',lbl:'Жири',v:r1(sum.f),u:'г',tgt:`${T.fat[0]}–${T.fat[1]}`,max:T.fat[1]},
-    {m:'carb',lbl:'Вуглеводи',v:r1(sum.c),u:'г',tgt:`${T.carb[0]}–${T.carb[1]}`,max:T.carb[1]},
-    {m:'fiber',lbl:'Клітковина',v:r1(sum.fb),u:'г',tgt:`≥ ${T.fiber}`,max:T.fiber}
+    {m:'prot',lbl:'Білки',v:r1(sum.p),tgt:`≥ ${T.prot}`,lo:T.prot,hi:T.protMax,scale:T.protMax*1.1},
+    {m:'fat',lbl:'Жири',v:r1(sum.f),tgt:`${T.fat[0]}–${T.fat[1]}`,lo:T.fat[0],hi:T.fat[1],scale:T.fat[1]*1.15},
+    {m:'carb',lbl:'Вуглеводи',v:r1(sum.c),tgt:`${T.carb[0]}–${T.carb[1]}`,lo:T.carb[0],hi:T.carb[1],scale:T.carb[1]*1.15},
+    {m:'fiber',lbl:'Клітковина',v:r1(sum.fb),tgt:`≥ ${T.fiber}`,lo:T.fiber,hi:null,scale:T.fiber*1.35}
   ];
   $('#fcTotals').innerHTML=rows.map(row=>{
     const st=items.length?fcStatus(row.m,row.v,T):null;
-    const pct=Math.min(100,row.max?row.v/row.max*100:0);
-    return `<div class="fc-bar ${st||''}"><div class="t"><span><b>${row.lbl}</b> — ${row.v} ${row.u} <span style="color:var(--muted)">/ ${row.tgt}</span></span>${st?`<span class="fc-st ${st}">${FC_ST_LBL[st]}</span>`:''}</div><div class="track"><span style="width:${pct}%"></span></div></div>`;
+    const pct=Math.min(100,row.v/row.scale*100);
+    const mark=x=>`<i class="mark" style="left:${Math.min(99,x/row.scale*100)}%"></i>`;
+    let left='';
+    if(items.length){
+      if(st==='under')left=`<span class="fc-left under">ще ${r1(row.lo-row.v)} г</span>`;
+      else if(st==='over')left=`<span class="fc-left over">+${r1(row.v-(row.hi??row.lo))} г понад</span>`;
+      else left=`<span class="fc-left ok">✓ норма</span>`;
+    }
+    return `<div class="fc-bar ${st||''}"><div class="t"><span><b>${row.lbl}</b> — ${row.v} г <span style="color:var(--muted)">/ ${row.tgt}</span></span>${left}</div><div class="track"><span style="width:${pct}%"></span>${mark(row.lo)}${row.hi?mark(row.hi):''}</div></div>`;
   }).join('');
-  const over=rows.filter(r=>items.length&&fcStatus(r.m,r.v,T)==='over').map(r=>r.lbl.toLowerCase());
-  const under=rows.filter(r=>items.length&&fcStatus(r.m,r.v,T)==='under').map(r=>r.lbl.toLowerCase());
+  const allRows=[{m:'kcal',lbl:'калорії',v:kcalV},...rows.map(r=>({m:r.m,lbl:r.lbl.toLowerCase(),v:r.v}))];
+  const over=allRows.filter(r=>items.length&&fcStatus(r.m,r.v,T)==='over').map(r=>r.lbl);
+  const under=allRows.filter(r=>items.length&&fcStatus(r.m,r.v,T)==='under').map(r=>r.lbl);
   $('#fcSum').innerHTML=!items.length?'':(over.length||under.length)
     ?`${over.length?`<span style="color:#a44b56">⚠ Перебір: ${over.join(', ')}</span>`:''}${over.length&&under.length?' · ':''}${under.length?`<span style="color:#a06318">Недобір: ${under.join(', ')}</span>`:''}`
     :'<span style="color:var(--ok)">✓ Усе в межах норми</span>';
