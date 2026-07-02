@@ -460,7 +460,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
               <div><label>Що зробити</label><input class="fld" id="daTitle" placeholder="напр. УЗД, дзвінок мамі"></div>
               <div><label>Від</label><input class="fld" id="daStart" type="time"></div>
               <div><label>До</label><input class="fld" id="daEnd" type="time"></div>
-              <div><label>Пріоритет</label><select class="fld" id="daPrio"></select></div>
+              <div><label>Категорія</label><select class="fld catsel" data-mode="task" id="daPrio"></select></div>
               <div><button class="btn" id="daAdd">Додати</button></div>
             </div>
             <div class="tplrow" id="daTplWrap">
@@ -488,7 +488,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
           <div><label>Що робити</label><input class="fld" id="ntTitle" placeholder="напр. Плавання на річці"></div>
           <div><label>Від</label><input class="fld" id="ntStart" type="time"></div>
           <div><label>До</label><input class="fld" id="ntEnd" type="time"></div>
-          <div><label>Пріоритет</label><select class="fld" id="ntPrio"></select></div>
+          <div><label>Категорія</label><select class="fld catsel" data-mode="task" id="ntPrio"></select></div>
           <div><label>Разів/тиж</label><input class="fld" id="ntTarget" type="number" min="1" max="14" value="3"></div>
           <div><button class="btn" id="ntAdd">Додати</button></div>
         </div>
@@ -621,7 +621,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
    куди підключиться синхронізація з Google Drive (див. decision-синхронізація.md). */
 
 // Усі ключі стану «Ясно». Цей список — джерело правди для синхронізації (один JSON у Drive).
-const STATE_KEYS=['tasks','events','log','affairs','dayplans','seeded','shop','shopCustom','books','bookState','tabs','overlapOk'];
+const STATE_KEYS=['tasks','events','log','affairs','dayplans','seeded','shop','shopCustom','books','bookState','tabs','overlapOk','cats'];
 
 // Низькорівневий бекенд: window.storage → localStorage → памʼять (fallback).
 const _memBackend={};
@@ -740,6 +740,7 @@ async function drivePull(){
     if(remoteU>localU){
       for(const k of STATE_KEYS){ if(k in remote){ state[k]=remote[k]; await backend.set(k,remote[k]); } }
       state.updatedAt=remoteU; await backend.set('updatedAt',remoteU);
+      customCats=await getCats(); applyCats();
       await renderAll();
     } else if(localU>remoteU){
       await driveUpload(JSON.stringify(state));
@@ -800,6 +801,43 @@ const PRIOS=[
 ];
 const P=Object.fromEntries(PRIOS.map(p=>[p.id,p]));
 const TRACKED=PRIOS.filter(p=>p.track);
+
+/* ===== Категорії поза пріоритетами: фіксована «Інше» + власні (ключ cats, синхронізуються) ===== */
+const OTHER={id:'other',n:'Інше',sh:'Інше',c:'#8A8F98',track:false};
+const CAT_PALETTE=['#8E7CC3','#B5836A','#5B8A72','#7A6F9B','#A0698A','#5F7A8A','#8A7A4A','#6A8A5F'];
+let customCats=[];
+async function getCats(){return await store.get('cats',[]);}
+async function setCats(c){await store.set('cats',c);}
+function applyCats(){ // домержити категорії у мапу P, щоб назви/кольори працювали в усіх P[...] по коду
+  customCats.forEach(c=>{P[c.id]=c;});
+  P.other=OTHER;
+  if(!P.admin)P.admin={id:'admin',n:'Інше / адмін',sh:'Адмін',c:'#8A8F98',track:false};
+}
+// Групи категорій, куди можуть падати задачі поза 7 пріоритетами (щоб не зникали зі списків)
+function taskGroups(){return [...PRIOS,...customCats,OTHER];}
+function knownCatIds(){return new Set([...PRIOS,...customCats].map(p=>p.id));}
+// задачі групи p; у «Інше» падають і task.prio==='other', і будь-які з невідомою категорією (сироти)
+function tasksInGroup(list,p){if(p.id==='other'){const kn=knownCatIds();return list.filter(t=>t.prio==='other'||!kn.has(t.prio));}return list.filter(t=>t.prio===p.id);}
+// Опції для <select class="catsel"> категорії. mode:'task' → додає «Інше»; 'event' → «Інше / адмін».
+function catSelHTML(selId,mode){
+  let o=[...PRIOS,...customCats].map(p=>`<option value="${p.id}" ${p.id===selId?'selected':''}>${esc(p.n)}</option>`).join('');
+  if(mode==='event')o+=`<option value="admin" ${selId==='admin'?'selected':''}>Інше / адмін</option>`;
+  else o+=`<option value="other" ${selId==='other'?'selected':''}>Інше</option>`;
+  o+=`<option value="__new__">+ Нова категорія…</option>`;
+  return o;
+}
+// Створення нової категорії просто з будь-якого <select class="catsel"> (пункт «+ Нова категорія…»)
+document.addEventListener('change',async e=>{
+  const s=e.target;
+  if(!(s&&s.tagName==='SELECT'&&s.classList.contains('catsel')))return;
+  if(s.value!=='__new__'){s.dataset.prev=s.value;return;}
+  const name=(window.prompt('Назва нової категорії:')||'').trim();
+  if(!name){const first=[...s.options].find(o=>o.value!=='__new__');s.value=s.dataset.prev||(first?first.value:'');return;}
+  const id='c'+uid();
+  const cat={id,n:name,sh:name.length>12?name.slice(0,12):name,c:CAT_PALETTE[customCats.length%CAT_PALETTE.length],track:false,custom:true};
+  customCats.push(cat);await setCats(customCats);applyCats();
+  s.innerHTML=catSelHTML(id,s.dataset.mode);s.value=id;s.dataset.prev=id;
+});
 
 const DEFAULT_TASKS=[
   {id:'t7',title:'Річка: рух + плавання',prio:'move',target:5,start:'05:00',end:'06:30',notes:''},
@@ -949,14 +987,14 @@ async function renderToday(){
     host.innerHTML='<ul class="cl">'+sorted.map(t=>taskRow(t,st,'')).join('')+'</ul>';
     bindRows(host,dk);
   } else {
-    host.innerHTML=PRIOS.map(p=>{const list=plan.filter(t=>t.prio===p.id);if(!list.length)return '';
+    host.innerHTML=taskGroups().map(p=>{const list=tasksInGroup(plan,p);if(!list.length)return '';
       return `<div class="timehdr" style="color:${p.c}">${p.n}</div><ul class="cl">`+list.map(t=>taskRow(t,st,'')).join('')+'</ul>';}).join('');
     bindRows(host,dk);
   }
   renderWeek();
 }
 async function renderDayAdd(dk,plan){
-  $('#daPrio').innerHTML=PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('');
+  $('#daPrio').innerHTML=catSelHTML($('#daPrio').value||'','task');
   // template tasks not currently in this day's plan (removed ones, or any not present)
   const tpl=await getTasks();const present=new Set(plan.map(t=>t.id));
   const avail=tpl.filter(t=>!present.has(t.id));
@@ -1025,7 +1063,7 @@ async function openTaskEditor(id,ctx){const scope=ctx?ctx.scope:'template';
   $('#drawerBody').innerHTML=`<div class="dform">
     <label>Назва</label><input id="etTitle" value="${esc(t.title)}">
     <div class="two"><div><label>Від</label><input id="etStart" type="time" value="${t.start||''}"></div><div><label>До</label><input id="etEnd" type="time" value="${t.end||''}"></div></div>
-    <label>Пріоритет</label><select id="etPrio">${PRIOS.map(p=>`<option value="${p.id}" ${p.id===t.prio?'selected':''}>${p.n}</option>`).join('')}</select>
+    <label>Категорія</label><select id="etPrio" class="catsel" data-mode="task">${catSelHTML(t.prio,'task')}</select>
     ${scope==='template'?`<label>Разів на тиждень</label><input id="etTarget" type="number" min="1" max="21" value="${t.target||1}">
     <label>Дні тижня <span style="text-transform:none;font-weight:400;color:var(--muted)">(порожньо = щодня)</span></label><div class="daychips" id="etDays">${dayChips(t.days)}</div>`:''}
     <label>Нотатки</label><textarea id="etNotes" placeholder="Деталі, нагадування…">${esc(t.notes||'')}</textarea>
@@ -1047,7 +1085,7 @@ async function openEventEditor(dk,id){const ev=await getEvents();const e=(ev[dk]
   $('#drawerBody').innerHTML=`<div class="dform">
     <label>Що</label><input id="eeTitle" value="${esc(e.title)}">
     <div class="two"><div><label>Від</label><input id="eeStart" type="time" value="${e.t||''}"></div><div><label>До</label><input id="eeEnd" type="time" value="${e.end||''}"></div></div>
-    <label>Категорія</label><select id="eeCat">${PRIOS.map(p=>`<option value="${p.id}" ${p.id===e.cat?'selected':''}>${p.n}</option>`).join('')}<option value="admin" ${e.cat==='admin'?'selected':''}>Інше / адмін</option></select>
+    <label>Категорія</label><select id="eeCat" class="catsel" data-mode="event">${catSelHTML(e.cat,'event')}</select>
     <label class="star-toggle"><input type="checkbox" id="eeStar" ${e.important?'checked':''}> Важлива дата (★)</label>
     <button class="btn" id="eeSave" style="width:100%;margin-top:14px">Зберегти</button>
     <button class="btn ghost danger" id="eeDel" style="width:100%;margin-top:8px">Видалити подію</button></div>`;
@@ -1067,9 +1105,10 @@ async function renderPrioCards(){const {byPrio}=await weekStats();
     return `<div class="card" style="position:relative;overflow:hidden"><div style="position:absolute;top:-8px;right:6px;font-family:Oswald;font-weight:700;font-size:60px;color:var(--mist2);line-height:1">${p.rank}</div>
       <div style="position:relative"><div style="font-weight:700;font-size:14.5px;color:${p.c}">${p.n}</div>${body}</div></div>`;}).join('');}
 async function renderTasks(){const tasks=await getTasks();
-  $('#ntPrio').innerHTML=PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('');
+  $('#ntPrio').innerHTML=catSelHTML($('#ntPrio').value||'','task');
   if($('#ntDays')&&!$('#ntDays').children.length){$('#ntDays').innerHTML=dayChips([]);bindDayChips($('#ntDays'));}
-  $('#taskList').innerHTML=PRIOS.map(p=>{const list=tasks.filter(t=>t.prio===p.id);
+  const groupsHtml=taskGroups().map(p=>{const list=tasksInGroup(tasks,p);
+    if((p.custom||p.id==='other')&&!list.length)return '';
     const rows=list.map((t,i)=>`<div class="tm-row" data-id="${t.id}">
       <span class="ttl">${esc(t.title)}</span>${t.start?`<span class="tm-time">${t.start}${t.end?'–'+t.end:''}</span>`:''}<span class="tdays">${daysLabel(t.days)}</span><span class="tg">${t.target}×/тиж</span>
       <button data-act="up" ${i===0?'style="visibility:hidden"':''}>↑</button><button data-act="down" ${i===list.length-1?'style="visibility:hidden"':''}>↓</button>
@@ -1082,7 +1121,17 @@ async function renderTasks(){const tasks=await getTasks();
         <input class="fld" data-ct type="number" min="1" max="21" value="3" title="разів/тиж">
         <button class="btn sm" data-cadd>Додати</button>
       </div>`;}).join('');
-  $('#taskList').querySelectorAll('.tm-row').forEach(r=>{const id=r.dataset.id;
+  const mgr=customCats.length?('<div class="eyebrow" style="margin:18px 0 8px;color:var(--muted)">Свої категорії</div>'+customCats.map(c=>`<div class="tm-row" data-cid="${c.id}"><span class="pcdot" style="background:${c.c}"></span><span class="ttl">${esc(c.n)}</span><button data-act="crename" title="Перейменувати">✎</button><button class="x" data-act="cdelete" title="Видалити">✕</button></div>`).join('')):'';
+  $('#taskList').innerHTML=groupsHtml+mgr;
+  $('#taskList').querySelectorAll('[data-cid]').forEach(r=>{const cid=r.dataset.cid;
+    r.querySelector('[data-act="crename"]').onclick=async()=>{const c=customCats.find(x=>x.id===cid);if(!c)return;const nn=(window.prompt('Нова назва категорії:',c.n)||'').trim();if(!nn)return;c.n=nn;c.sh=nn.length>12?nn.slice(0,12):nn;await setCats(customCats);applyCats();afterPlan();};
+    r.querySelector('[data-act="cdelete"]').onclick=async()=>{const c=customCats.find(x=>x.id===cid);if(!c)return;const ts=await getTasks();const cnt=ts.filter(t=>t.prio===cid).length;if(!window.confirm('Видалити категорію «'+c.n+'»?'+(cnt?' '+cnt+' задач(і) перейдуть у «Інше».':'')))return;
+      ts.forEach(t=>{if(t.prio===cid)t.prio='other';});await setTasks(ts);
+      const dps=await getDayPlans();Object.keys(dps).forEach(dk=>{const dp=dps[dk];(dp.add||[]).forEach(t=>{if(t.prio===cid)t.prio='other';});if(dp.over)Object.keys(dp.over).forEach(id=>{if(dp.over[id]&&dp.over[id].prio===cid)dp.over[id].prio='other';});});await setDayPlans(dps);
+      const ev=await getEvents();Object.keys(ev).forEach(dk=>ev[dk].forEach(e=>{if(e.cat===cid)e.cat='other';}));await setEvents(ev);
+      customCats=customCats.filter(x=>x.id!==cid);await setCats(customCats);applyCats();afterPlan();};
+  });
+  $('#taskList').querySelectorAll('.tm-row[data-id]').forEach(r=>{const id=r.dataset.id;
     r.querySelector('[data-act="edit"]').onclick=()=>openTaskEditor(id);
     r.querySelector('[data-act="del"]').onclick=async()=>{const ts=(await getTasks()).filter(t=>t.id!==id);await setTasks(ts);afterPlan();};
     r.querySelector('[data-act="up"]').onclick=()=>moveTask(id,-1);r.querySelector('[data-act="down"]').onclick=()=>moveTask(id,1);});
@@ -1159,22 +1208,22 @@ async function openDay(k,prefillTime){const d=parse(k);$('#drawerTitle').textCon
     <div class="dform" style="background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:6px">
       <div class="two"><div><label>Від</label><input type="time" id="evTime"></div><div><label>До</label><input type="time" id="evEnd"></div></div>
       <label>Що</label><input type="text" id="evTitle" placeholder="Чекап, УЗД, зустріч, дедлайн…">
-      <label>Категорія</label><select id="evCat">${PRIOS.map(p=>`<option value="${p.id}">${p.n}</option>`).join('')}<option value="admin">Інше / адмін</option></select>
+      <label>Категорія</label><select id="evCat" class="catsel" data-mode="event">${catSelHTML('','event')}</select>
       <label class="star-toggle"><input type="checkbox" id="evStar"> Важлива дата (★)</label>
       <button class="btn" id="evAdd" style="width:100%;margin-top:12px">Додати подію</button></div>
     ${evClipboard?`<button class="btn ghost" id="evPaste" style="width:100%;margin-top:8px">📋 Вставити «${esc(evClipboard.title)}»${evClipboard.t?' о '+evClipboard.t:''}</button>`:''}
     <p class="eyebrow">План дня <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(клік — редагувати лише цей день)</span></p>
     ${plan.map(t=>`<div class="ev-row plan" data-tid="${t.id}" data-torigin="${t.origin||''}"><span class="et">${t.start}${t.end?'–'+t.end:''}</span><span class="ex">${esc(t.title)}${t.notes?`<br><span style="font-size:11px;color:var(--muted)">📝 ${esc(t.notes)}</span>`:''}</span></div>`).join('')||'<p class="note-soft">Завдання з часом з’являться тут.</p>'}`;
-  $('#drawerBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const e=await getEvents();e[k]=(e[k]||[]).filter(x=>x.id!==b.dataset.rm);if(!e[k].length)delete e[k];await setEvents(e);openDay(k);renderCal();fillNextPill();});
+  $('#drawerBody').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const e=await getEvents();e[k]=(e[k]||[]).filter(x=>x.id!==b.dataset.rm);if(!e[k].length)delete e[k];await setEvents(e);openDay(k);renderCal();renderToday();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row[data-eid]').forEach(r=>r.querySelector('.ex').onclick=()=>openEventEditor(k,r.dataset.eid));
   $('#drawerBody').querySelectorAll('[data-echk]').forEach(c=>c.onclick=async()=>{const e=await getEvents();const it=(e[k]||[]).find(x=>x.id===c.dataset.echk);if(it){it.done=!it.done;await setEvents(e);}openDay(k);renderCal();renderToday();renderPrioCards();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row.aff').forEach(r=>r.querySelector('.achk').onclick=async()=>{const a2=await getAffairs();const it=(a2[r.dataset.affsid]?.items||[]).find(x=>x.id===r.dataset.affid);if(it){it.done=!it.done;await setAffairs(a2);}openDay(k);renderCal();renderToday();renderAffairs();fillNextPill();});
   $('#drawerBody').querySelectorAll('.ev-row.plan').forEach(r=>r.querySelector('.ex').onclick=()=>openTaskEditor(r.dataset.tid,{scope:'day',dk:k,origin:r.dataset.torigin}));
-  $('#evAdd').onclick=async()=>{const t=$('#evTitle').value.trim();if(!t)return $('#evTitle').focus();const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:$('#evTime').value,end:$('#evEnd').value,title:t,cat:$('#evCat').value,important:$('#evStar').checked});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};
+  $('#evAdd').onclick=async()=>{const t=$('#evTitle').value.trim();if(!t)return $('#evTitle').focus();const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:$('#evTime').value,end:$('#evEnd').value,title:t,cat:$('#evCat').value,important:$('#evStar').checked});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();renderToday();fillNextPill();};
   // копіювати подію в буфер
   $('#drawerBody').querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const e=await getEvents();const it=(e[k]||[]).find(x=>x.id===b.dataset.cp);if(it){evClipboard={t:it.t||'',end:it.end||'',title:it.title,cat:it.cat,important:!!it.important};try{localStorage.setItem('yo:evClip',JSON.stringify(evClipboard));}catch(_){}openDay(k);}});
   // вставити подію з буфера в цей день
-  {const pb=$('#evPaste');if(pb)pb.onclick=async()=>{if(!evClipboard)return;const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:evClipboard.t||'',end:evClipboard.end||'',title:evClipboard.title,cat:evClipboard.cat,important:!!evClipboard.important});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();fillNextPill();};}
+  {const pb=$('#evPaste');if(pb)pb.onclick=async()=>{if(!evClipboard)return;const e=await getEvents();e[k]=e[k]||[];e[k].push({id:uid(),t:evClipboard.t||'',end:evClipboard.end||'',title:evClipboard.title,cat:evClipboard.cat,important:!!evClipboard.important});e[k].sort((x,y)=>(x.t||'').localeCompare(y.t||''));await setEvents(e);openDay(k);renderCal();renderToday();fillNextPill();};}
   // якщо клікнули по конкретному часу в сітці — підставити його
   if(prefillTime){const et=$('#evTime');if(et)et.value=prefillTime;const ti=$('#evTitle');if(ti)setTimeout(()=>ti.focus(),50);}
   openDrawer();}
@@ -1486,7 +1535,10 @@ function setupSync(){
     } else if(++tries>40){ clearInterval(tick); } },250);
 }
 
-(async function(){await loadState();await seedOnce();await renderAll();setupSync();})();
+(async function(){await loadState();customCats=await getCats();applyCats();
+  // гарантуємо, що шаблон задач збережений у стані (щоб Telegram-скрипт бачив задачі в Drive)
+  if(state.tasks===undefined)await store.set('tasks',DEFAULT_TASKS);
+  await seedOnce();await renderAll();setupSync();})();
 </script>
 </body>
 </html>
